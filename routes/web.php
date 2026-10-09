@@ -20,7 +20,9 @@ use App\Http\Controllers\Web\EventController;
 use App\Http\Controllers\Web\My\AgendaController;
 use App\Http\Controllers\Web\My\FavoriteController;
 use App\Http\Controllers\Web\My\ProfileController;
+use App\Http\Controllers\Web\OrganizationController;
 use App\Http\Controllers\Web\Promoter\EventController as PromoterEventController;
+use App\Http\Controllers\Web\PromoterController;
 use App\Http\Controllers\Web\PromoterRequestController;
 use Illuminate\Support\Facades\Route;
 
@@ -29,6 +31,13 @@ Route::get('/', fn () => redirect()->route('events.index'))->name('home');
 // ---- Public events area (no login required) ----
 Route::get('/events', [EventController::class, 'index'])->name('events.index');
 Route::get('/calendar', [EventController::class, 'calendar'])->name('events.calendar');
+Route::get('/category/{category:slug}', [EventController::class, 'category'])->name('events.category');
+
+// ---- Public directory: promoters & organizations ----
+Route::get('/promoters', [PromoterController::class, 'index'])->name('promoters.index');
+Route::get('/promoter/{promoter:slug}', [PromoterController::class, 'show'])->name('promoters.show');
+Route::get('/organizations', [OrganizationController::class, 'index'])->name('organizations.index');
+Route::get('/organization/{organization:slug}', [OrganizationController::class, 'show'])->name('organizations.show');
 
 // ---- Gated: event detail requires a registered, logged-in user ----
 Route::get('/event/{event:slug}', [EventController::class, 'show'])

@@ -35,6 +35,8 @@
         <nav>
             <a href="{{ route('events.index') }}">Eventos</a>
             <a href="{{ route('events.calendar') }}">Calendário</a>
+            <a href="{{ route('promoters.index') }}">Promotores</a>
+            <a href="{{ route('organizations.index') }}">Organizações</a>
             <select onchange="location.href='?lang='+this.value" aria-label="Idioma" style="padding:4px 6px;border:1px solid #e4dccb;border-radius:6px;font:inherit">
                 @foreach (config('locales.supported') as $code => $label)
                     <option value="{{ $code }}" @selected(app()->getLocale() === $code)>{{ strtoupper($code) }}</option>

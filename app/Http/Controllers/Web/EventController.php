@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Web;
 
 use App\Http\Controllers\Controller;
+use App\Models\Category;
 use App\Models\Event;
 use App\Services\Events\PublicEventService;
 use Illuminate\Http\Request;
@@ -17,11 +18,24 @@ class EventController extends Controller
     /** Public: browsable list of upcoming events. */
     public function index(Request $request): View
     {
-        $category = $request->string('categoria')->value() ?: null;
+        $category = $request->string('category')->value() ?: null;
+        $search = $request->string('q')->value() ?: null;
 
         return view('events.index', [
-            'events' => $this->events->upcomingList($category),
+            'events' => $this->events->upcomingList($category, $search),
             'category' => $category,
+            'search' => $search,
+            'heading' => null,
+        ]);
+    }
+
+    public function category(Category $category): View
+    {
+        return view('events.index', [
+            'events' => $this->events->upcomingList($category->slug),
+            'category' => $category->slug,
+            'search' => null,
+            'heading' => $category->name,
         ]);
     }
 
