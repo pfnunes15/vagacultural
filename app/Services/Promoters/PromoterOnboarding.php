@@ -6,10 +6,13 @@ namespace App\Services\Promoters;
 
 use App\Enums\PromoterRequestStatus;
 use App\Enums\UserRole;
+use App\Models\EmailLog;
 use App\Models\Promoter;
 use App\Models\PromoterRequest;
 use App\Models\User;
 use App\Models\UserRoleAssignment;
+use App\Notifications\PromoterActivated;
+use App\Notifications\PromoterRejected;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use RuntimeException;
@@ -80,6 +83,18 @@ class PromoterOnboarding
                 'created_promoter_id' => $promoter->id,
             ]);
 
+            $request->user?->notify(new PromoterActivated($promoter));
+
+            EmailLog::create([
+                'user_id' => $request->user_id,
+                'type' => 'promoter_activation',
+                'recipient' => (string) ($request->user->email ?? $request->email),
+                'subject' => 'Perfil de promotor ativado',
+                'status' => 'sent',
+                'sent_by' => $admin->id,
+                'sent_at' => now(),
+            ]);
+
             return $promoter;
         });
     }
@@ -92,6 +107,8 @@ class PromoterOnboarding
             'reviewed_at' => now(),
             'review_notes' => $notes,
         ]);
+
+        $request->user?->notify(new PromoterRejected($notes));
     }
 
     private function uniqueSlug(string $name): string

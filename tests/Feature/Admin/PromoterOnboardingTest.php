@@ -8,6 +8,9 @@ use App\Models\Promoter;
 use App\Models\PromoterRequest;
 use App\Models\User;
 use App\Models\UserRoleAssignment;
+use App\Notifications\PromoterActivated;
+use App\Notifications\PromoterRejected;
+use Illuminate\Support\Facades\Notification;
 
 function userWithRole(UserRole $role): User
 {
@@ -95,4 +98,34 @@ it('marks a request rejected with notes', function (): void {
 
 it('keeps the promoter requests queue admin-only', function (): void {
     $this->actingAs(userWithRole(UserRole::Promoter))->get('/admin/promoters/requests')->assertForbidden();
+});
+
+it('notifies and logs an email when an admin activates a promoter', function (): void {
+    Notification::fake();
+    $admin = userWithRole(UserRole::Admin);
+    $applicant = userWithRole(UserRole::User);
+    $request = $applicant->promoterRequests()->create([
+        'proposed_name' => 'Novo Promotor',
+        'status' => PromoterRequestStatus::Pending->value,
+    ]);
+
+    $this->actingAs($admin)->post(route('admin.promoters.requests.approve', $request))->assertRedirect();
+
+    Notification::assertSentTo($applicant, PromoterActivated::class);
+    $this->assertDatabaseHas('email_logs', ['user_id' => $applicant->id, 'type' => 'promoter_activation']);
+    expect($applicant->fresh()->promoterProfile->is_active)->toBeTrue();
+});
+
+it('notifies the applicant when an admin rejects', function (): void {
+    Notification::fake();
+    $admin = userWithRole(UserRole::Admin);
+    $applicant = userWithRole(UserRole::User);
+    $request = $applicant->promoterRequests()->create([
+        'proposed_name' => 'Spam',
+        'status' => PromoterRequestStatus::Pending->value,
+    ]);
+
+    $this->actingAs($admin)->post(route('admin.promoters.requests.reject', $request), ['notes' => 'Fora de âmbito'])->assertRedirect();
+
+    Notification::assertSentTo($applicant, PromoterRejected::class);
 });
