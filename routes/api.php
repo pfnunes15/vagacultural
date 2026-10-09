@@ -6,6 +6,7 @@ use App\Http\Controllers\Api\V1\AuthController;
 use App\Http\Controllers\Api\V1\EngagementController;
 use App\Http\Controllers\Api\V1\EventController;
 use App\Http\Controllers\Api\V1\ProfileController;
+use App\Http\Controllers\Api\V1\RecommendationController;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('v1')->group(function (): void {
@@ -21,6 +22,7 @@ Route::prefix('v1')->group(function (): void {
         // Profile
         Route::get('me/profile', [ProfileController::class, 'show'])->name('api.me.profile');
         Route::put('me/profile', [ProfileController::class, 'update'])->name('api.me.profile.update');
+        Route::get('me/recommendations', [RecommendationController::class, 'index'])->name('api.me.recommendations');
 
         // Events: list, calendar and detail all require authentication.
         Route::get('events', [EventController::class, 'index'])->name('api.events.index');

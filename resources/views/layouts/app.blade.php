@@ -50,6 +50,7 @@
                 @if (! $u->isPromoter() && ! $u->isOrganization() && ! $u->isAdmin())
                     <a href="{{ route('promoter.apply') }}">Tornar-me promotor</a>
                 @endif
+                <a href="{{ route('my.recommendations') }}">Para ti</a>
                 <a href="{{ route('my.favorites') }}">Favoritos</a>
                 <a href="{{ route('my.agenda') }}">Agenda</a>
                 <a href="{{ route('my.profile') }}">Perfil</a>

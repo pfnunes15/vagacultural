@@ -22,6 +22,8 @@ use Spatie\Translatable\HasTranslations;
  * @property EventStatus $status
  * @property AgeRating|null $min_age
  * @property Carbon|null $published_at
+ * @property int|null $recommendation_score transient, set by RecommendationService
+ * @property string|null $recommendation_reason transient, set by RecommendationService
  */
 class Event extends Model
 {

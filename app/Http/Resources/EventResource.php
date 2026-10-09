@@ -38,6 +38,7 @@ class EventResource extends JsonResource
             'tags' => TagResource::collection($this->whenLoaded('tags')),
             'occurrences' => EventOccurrenceResource::collection($this->whenLoaded('occurrences')),
             'promoter' => new PromoterResource($this->whenLoaded('promoter')),
+            'recommendation_reason' => $this->when($this->recommendation_reason !== null, fn () => $this->recommendation_reason),
         ];
     }
 }

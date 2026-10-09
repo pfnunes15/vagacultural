@@ -22,6 +22,7 @@ use App\Http\Controllers\Web\My\AgendaController;
 use App\Http\Controllers\Web\My\FavoriteController;
 use App\Http\Controllers\Web\My\FollowController;
 use App\Http\Controllers\Web\My\ProfileController;
+use App\Http\Controllers\Web\My\RecommendationController;
 use App\Http\Controllers\Web\OrganizationController;
 use App\Http\Controllers\Web\Promoter\EventController as PromoterEventController;
 use App\Http\Controllers\Web\PromoterController;
@@ -92,6 +93,8 @@ Route::middleware('auth')->prefix('my')->name('my.')->group(function (): void {
 
     Route::post('follow/promoter/{promoter:slug}', [FollowController::class, 'promoter'])->name('follow.promoter');
     Route::post('follow/organization/{organization:slug}', [FollowController::class, 'organization'])->name('follow.organization');
+
+    Route::get('recommendations', [RecommendationController::class, 'index'])->name('recommendations');
 });
 
 // ---- Promoter / organization dashboard (create & manage own events) ----
