@@ -5,6 +5,7 @@ declare(strict_types=1);
 use App\Http\Controllers\Web\Admin\DashboardController;
 use App\Http\Controllers\Web\Admin\EventModerationController;
 use App\Http\Controllers\Web\Admin\ImpersonationController;
+use App\Http\Controllers\Web\Admin\PromoterRequestController as AdminPromoterRequestController;
 use App\Http\Controllers\Web\Admin\SystemStatusController;
 use App\Http\Controllers\Web\Admin\UserController as AdminUserController;
 use App\Http\Controllers\Web\Auth\AuthenticatedSessionController;
@@ -12,6 +13,7 @@ use App\Http\Controllers\Web\Auth\EmailVerificationController;
 use App\Http\Controllers\Web\Auth\RegisteredUserController;
 use App\Http\Controllers\Web\EventController;
 use App\Http\Controllers\Web\Promoter\EventController as PromoterEventController;
+use App\Http\Controllers\Web\PromoterRequestController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', fn () => redirect()->route('events.index'))->name('home');
@@ -37,6 +39,12 @@ Route::middleware('guest')->group(function (): void {
 Route::post('/sair', [AuthenticatedSessionController::class, 'destroy'])
     ->middleware('auth')
     ->name('logout');
+
+// ---- Become a promoter (application) ----
+Route::middleware('auth')->group(function (): void {
+    Route::get('/promotor/candidatura', [PromoterRequestController::class, 'create'])->name('promoter.apply');
+    Route::post('/promotor/candidatura', [PromoterRequestController::class, 'store']);
+});
 
 // ---- Email verification (registration confirmation) ----
 Route::middleware('auth')->group(function (): void {
@@ -79,4 +87,9 @@ Route::middleware(['auth', 'role:admin'])
 
         // System / API status
         Route::get('sistema', [SystemStatusController::class, 'index'])->name('system.status');
+
+        // Promoter onboarding requests
+        Route::get('promotores/pedidos', [AdminPromoterRequestController::class, 'index'])->name('promoters.requests');
+        Route::post('promotores/pedidos/{promoterRequest}/aprovar', [AdminPromoterRequestController::class, 'approve'])->name('promoters.requests.approve');
+        Route::post('promotores/pedidos/{promoterRequest}/recusar', [AdminPromoterRequestController::class, 'reject'])->name('promoters.requests.reject');
     });

@@ -40,6 +40,9 @@
                 @if ($u->isPromoter() || $u->isOrganization() || $u->isAdmin())
                     <a href="{{ route('painel.eventos.index') }}">Painel</a>
                 @endif
+                @if (! $u->isPromoter() && ! $u->isOrganization() && ! $u->isAdmin())
+                    <a href="{{ route('promoter.apply') }}">Tornar-me promotor</a>
+                @endif
                 @if ($u->isAdmin())
                     <a href="{{ route('admin.dashboard') }}">Admin</a>
                 @endif

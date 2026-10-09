@@ -5,10 +5,12 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Web\Admin;
 
 use App\Enums\EventStatus;
+use App\Enums\PromoterRequestStatus;
 use App\Http\Controllers\Controller;
 use App\Models\Event;
 use App\Models\Organization;
 use App\Models\Promoter;
+use App\Models\PromoterRequest;
 use App\Models\User;
 use App\Models\UserRoleAssignment;
 use Illuminate\View\View;
@@ -24,6 +26,7 @@ class DashboardController extends Controller
                 'organizacoes' => Organization::count(),
                 'eventos_publicados' => Event::where('status', EventStatus::Published->value)->count(),
                 'eventos_pendentes' => Event::where('status', EventStatus::Pending->value)->count(),
+                'pedidos_promotor' => PromoterRequest::where('status', PromoterRequestStatus::Pending->value)->count(),
             ],
             'rolesBreakdown' => UserRoleAssignment::query()
                 ->selectRaw('role, count(*) as total')
