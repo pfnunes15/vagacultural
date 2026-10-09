@@ -2,12 +2,15 @@
 
 declare(strict_types=1);
 
+use App\Http\Controllers\Web\Admin\CategoryController as AdminCategoryController;
 use App\Http\Controllers\Web\Admin\DashboardController;
 use App\Http\Controllers\Web\Admin\EventModerationController;
 use App\Http\Controllers\Web\Admin\ImpersonationController;
+use App\Http\Controllers\Web\Admin\OrganizationController as AdminOrganizationController;
 use App\Http\Controllers\Web\Admin\PromoterRequestController as AdminPromoterRequestController;
 use App\Http\Controllers\Web\Admin\SystemStatusController;
 use App\Http\Controllers\Web\Admin\UserController as AdminUserController;
+use App\Http\Controllers\Web\Admin\VenueController as AdminVenueController;
 use App\Http\Controllers\Web\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\Web\Auth\EmailVerificationController;
 use App\Http\Controllers\Web\Auth\NewPasswordController;
@@ -112,6 +115,11 @@ Route::middleware(['auth', 'role:admin'])
 
         // System / API status
         Route::get('system', [SystemStatusController::class, 'index'])->name('system.status');
+
+        // Content management
+        Route::resource('categories', AdminCategoryController::class)->except('show');
+        Route::resource('venues', AdminVenueController::class)->except('show');
+        Route::resource('organizations', AdminOrganizationController::class)->except('show');
 
         // Promoter onboarding requests
         Route::get('promoters/requests', [AdminPromoterRequestController::class, 'index'])->name('promoters.requests');

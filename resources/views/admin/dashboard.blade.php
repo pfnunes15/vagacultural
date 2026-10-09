@@ -18,6 +18,9 @@
         <li><a href="{{ route('admin.users.index') }}">Gerir utilizadores</a> — papéis, confiança, reenvio de e-mail, impersonação</li>
         <li><a href="{{ route('admin.events.pending') }}">Eventos pendentes</a> — aprovar / recusar</li>
         <li><a href="{{ route('admin.promoters.requests') }}">Candidaturas a promotor</a> — aprovar / recusar</li>
+        <li><a href="{{ route('admin.categories.index') }}">Categorias</a></li>
+        <li><a href="{{ route('admin.venues.index') }}">Locais</a></li>
+        <li><a href="{{ route('admin.organizations.index') }}">Organizações</a></li>
         <li><a href="{{ route('admin.system.status') }}">Estado do sistema / APIs</a></li>
     </ul>
 @endsection
