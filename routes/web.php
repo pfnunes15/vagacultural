@@ -2,10 +2,16 @@
 
 declare(strict_types=1);
 
+use App\Http\Controllers\Web\Admin\DashboardController;
 use App\Http\Controllers\Web\Admin\EventModerationController;
+use App\Http\Controllers\Web\Admin\ImpersonationController;
+use App\Http\Controllers\Web\Admin\SystemStatusController;
+use App\Http\Controllers\Web\Admin\UserController as AdminUserController;
 use App\Http\Controllers\Web\Auth\AuthenticatedSessionController;
+use App\Http\Controllers\Web\Auth\EmailVerificationController;
 use App\Http\Controllers\Web\Auth\RegisteredUserController;
 use App\Http\Controllers\Web\EventController;
+use App\Http\Controllers\Web\Promoter\EventController as PromoterEventController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', fn () => redirect()->route('events.index'))->name('home');
@@ -32,18 +38,45 @@ Route::post('/sair', [AuthenticatedSessionController::class, 'destroy'])
     ->middleware('auth')
     ->name('logout');
 
+// ---- Email verification (registration confirmation) ----
+Route::middleware('auth')->group(function (): void {
+    Route::get('/email/verificar', [EmailVerificationController::class, 'notice'])->name('verification.notice');
+    Route::get('/email/verificar/{id}/{hash}', [EmailVerificationController::class, 'verify'])
+        ->middleware('signed')->name('verification.verify');
+    Route::post('/email/reenviar', [EmailVerificationController::class, 'resend'])
+        ->middleware('throttle:6,1')->name('verification.send');
+});
+
 // ---- Promoter / organization dashboard (create & manage own events) ----
 Route::middleware(['auth', 'role:promoter,organization,admin'])
     ->prefix('painel')->name('painel.')->group(function (): void {
-        Route::get('eventos', [App\Http\Controllers\Web\Promoter\EventController::class, 'index'])->name('eventos.index');
-        Route::get('eventos/novo', [App\Http\Controllers\Web\Promoter\EventController::class, 'create'])->name('eventos.create');
-        Route::post('eventos', [App\Http\Controllers\Web\Promoter\EventController::class, 'store'])->name('eventos.store');
+        Route::get('eventos', [PromoterEventController::class, 'index'])->name('eventos.index');
+        Route::get('eventos/novo', [PromoterEventController::class, 'create'])->name('eventos.create');
+        Route::post('eventos', [PromoterEventController::class, 'store'])->name('eventos.store');
     });
 
-// ---- Admin moderation (approve/reject pending events) ----
+// ---- Stop impersonating: reachable while logged in AS the impersonated user ----
+Route::post('/parar-impersonacao', [ImpersonationController::class, 'stop'])
+    ->middleware('auth')->name('impersonate.stop');
+
+// ---- Admin control center ----
 Route::middleware(['auth', 'role:admin'])
     ->prefix('admin')->name('admin.')->group(function (): void {
+        Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
+
+        // Users: roles, trust, activation, registration email, impersonation
+        Route::get('utilizadores', [AdminUserController::class, 'index'])->name('users.index');
+        Route::post('utilizadores/{user}/papeis', [AdminUserController::class, 'updateRoles'])->name('users.roles');
+        Route::post('utilizadores/{user}/reenviar-email', [AdminUserController::class, 'resendEmail'])->name('users.resend');
+        Route::post('utilizadores/{user}/confianca', [AdminUserController::class, 'toggleTrust'])->name('users.trust');
+        Route::post('utilizadores/{user}/estado', [AdminUserController::class, 'toggleActive'])->name('users.active');
+        Route::post('utilizadores/{user}/impersonar', [ImpersonationController::class, 'start'])->name('users.impersonate');
+
+        // Event moderation
         Route::get('eventos/pendentes', [EventModerationController::class, 'index'])->name('eventos.pending');
         Route::post('eventos/{event}/aprovar', [EventModerationController::class, 'approve'])->name('eventos.approve');
         Route::post('eventos/{event}/rejeitar', [EventModerationController::class, 'reject'])->name('eventos.reject');
+
+        // System / API status
+        Route::get('sistema', [SystemStatusController::class, 'index'])->name('system.status');
     });

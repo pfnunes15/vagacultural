@@ -7,6 +7,7 @@ namespace App\Actions\Auth;
 use App\Enums\UserRole;
 use App\Models\User;
 use App\Models\UserRoleAssignment;
+use App\Services\Mail\RegistrationMailer;
 use Illuminate\Support\Facades\DB;
 
 /**
@@ -17,6 +18,8 @@ use Illuminate\Support\Facades\DB;
  */
 final class RegisterUser
 {
+    public function __construct(private readonly RegistrationMailer $mailer) {}
+
     /**
      * @param  array{name: string, email: string, password: string}  $data
      */
@@ -33,6 +36,8 @@ final class RegisterUser
                 'user_id' => $user->id,
                 'role' => $role->value,
             ]);
+
+            $this->mailer->send($user);
 
             // refresh() so database defaults (e.g. locale) are reflected in the response.
             return $user->refresh()->load('roles');

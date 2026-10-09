@@ -41,7 +41,7 @@
                     <a href="{{ route('painel.eventos.index') }}">Painel</a>
                 @endif
                 @if ($u->isAdmin())
-                    <a href="{{ route('admin.eventos.pending') }}">Pendentes</a>
+                    <a href="{{ route('admin.dashboard') }}">Admin</a>
                 @endif
                 <span class="muted">{{ $u->name }}</span>
                 <form method="POST" action="{{ route('logout') }}" style="margin:0">@csrf<button class="btn-ghost">Sair</button></form>
@@ -51,6 +51,12 @@
             @endauth
         </nav>
     </header>
+    @if (session()->has('impersonator_id'))
+        <div style="background:#cf9427;color:#1a1a1a;text-align:center;padding:8px">
+            A ver a plataforma como <strong>{{ auth()->user()->name }}</strong>.
+            <form method="POST" action="{{ route('impersonate.stop') }}" style="display:inline;margin-left:8px">@csrf<button class="btn-ghost" style="background:#fff">Voltar à minha conta</button></form>
+        </div>
+    @endif
     <main>
         @if (session('status'))<div class="flash">{{ session('status') }}</div>@endif
         @yield('content')
