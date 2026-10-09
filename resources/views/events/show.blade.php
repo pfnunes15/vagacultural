@@ -7,6 +7,17 @@
     <h1 style="margin:8px 0">{{ $event->title }}</h1>
     @if ($event->summary)<p style="font-size:18px">{{ $event->summary }}</p>@endif
 
+    @auth
+        <div style="display:flex;gap:10px;margin:12px 0">
+            <form method="POST" action="{{ route('my.favorites.toggle', $event) }}">@csrf
+                <button class="btn-ghost">{{ auth()->user()->favorites()->where('favoritable_type', $event->getMorphClass())->where('favoritable_id', $event->id)->exists() ? '★ Nos favoritos' : '☆ Favoritar' }}</button>
+            </form>
+            <form method="POST" action="{{ route('my.agenda.toggle', $event) }}">@csrf
+                <button class="btn-ghost">{{ auth()->user()->agendaItems()->where('event_id', $event->id)->exists() ? '✓ Na minha agenda' : '+ Adicionar à agenda' }}</button>
+            </form>
+        </div>
+    @endauth
+
     @if ($event->cover_image_path)
         <img src="{{ \Illuminate\Support\Facades\Storage::url($event->cover_image_path) }}" alt="Capa de {{ $event->title }}" style="max-width:360px;border-radius:12px">
     @endif

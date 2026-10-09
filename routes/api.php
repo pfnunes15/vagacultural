@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Http\Controllers\Api\V1\AuthController;
+use App\Http\Controllers\Api\V1\EngagementController;
 use App\Http\Controllers\Api\V1\EventController;
 use Illuminate\Support\Facades\Route;
 
@@ -20,5 +21,11 @@ Route::prefix('v1')->group(function (): void {
         Route::get('events', [EventController::class, 'index'])->name('api.events.index');
         Route::get('events/calendar', [EventController::class, 'calendar'])->name('api.events.calendar');
         Route::get('events/{event:slug}', [EventController::class, 'show'])->name('api.events.show');
+
+        // Registered user engagement
+        Route::get('me/favorites', [EngagementController::class, 'favorites'])->name('api.me.favorites');
+        Route::post('events/{event:slug}/favorite', [EngagementController::class, 'toggleFavorite'])->name('api.events.favorite');
+        Route::get('me/agenda', [EngagementController::class, 'agenda'])->name('api.me.agenda');
+        Route::post('events/{event:slug}/agenda', [EngagementController::class, 'toggleAgenda'])->name('api.events.agenda');
     });
 });

@@ -12,6 +12,8 @@ use App\Http\Controllers\Web\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\Web\Auth\EmailVerificationController;
 use App\Http\Controllers\Web\Auth\RegisteredUserController;
 use App\Http\Controllers\Web\EventController;
+use App\Http\Controllers\Web\My\AgendaController;
+use App\Http\Controllers\Web\My\FavoriteController;
 use App\Http\Controllers\Web\Promoter\EventController as PromoterEventController;
 use App\Http\Controllers\Web\PromoterRequestController;
 use Illuminate\Support\Facades\Route;
@@ -53,6 +55,14 @@ Route::middleware('auth')->group(function (): void {
         ->middleware('signed')->name('verification.verify');
     Route::post('/email/reenviar', [EmailVerificationController::class, 'resend'])
         ->middleware('throttle:6,1')->name('verification.send');
+});
+
+// ---- Registered user: favorites & personal agenda ----
+Route::middleware('auth')->prefix('minha')->name('my.')->group(function (): void {
+    Route::get('favoritos', [FavoriteController::class, 'index'])->name('favorites');
+    Route::post('favoritos/{event:slug}', [FavoriteController::class, 'toggle'])->name('favorites.toggle');
+    Route::get('agenda', [AgendaController::class, 'index'])->name('agenda');
+    Route::post('agenda/{event:slug}', [AgendaController::class, 'toggle'])->name('agenda.toggle');
 });
 
 // ---- Promoter / organization dashboard (create & manage own events) ----
