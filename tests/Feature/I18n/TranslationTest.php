@@ -51,9 +51,9 @@ it('returns API event content in the requested locale', function (): void {
 });
 
 it('resolves the locale from the ?lang query on the web', function (): void {
-    $this->get('/eventos?lang=fr');
+    $this->get('/events?lang=fr');
     expect(app()->getLocale())->toBe('fr');
 
-    $this->get('/eventos?lang=zz'); // unsupported -> ignored, stays on session/default
+    $this->get('/events?lang=zz'); // unsupported -> ignored, stays on session/default
     expect(app()->getLocale())->not->toBe('zz');
 });

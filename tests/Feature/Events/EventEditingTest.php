@@ -27,15 +27,15 @@ it('lets the owner open and submit the edit form', function (): void {
     $event = Event::factory()->published()->create(['promoter_id' => $promoter->id, 'title' => 'Antigo']);
     EventOccurrence::factory()->create(['event_id' => $event->id]);
 
-    $this->actingAs($user)->get(route('painel.eventos.edit', $event))->assertOk()->assertSee('Antigo');
+    $this->actingAs($user)->get(route('dashboard.events.edit', $event))->assertOk()->assertSee('Antigo');
 
-    $this->actingAs($user)->put(route('painel.eventos.update', $event), [
+    $this->actingAs($user)->put(route('dashboard.events.update', $event), [
         'title' => 'Novo Título',
         'categories' => [$category->id],
         'is_free' => '1',
         'tags' => 'jazz, noite',
         'occurrences' => [['starts_at' => now()->addDays(3)->format('Y-m-d H:i:s')]],
-    ])->assertRedirect(route('painel.eventos.index'));
+    ])->assertRedirect(route('dashboard.events.index'));
 
     $event->refresh();
     expect($event->title)->toBe('Novo Título')
@@ -52,8 +52,8 @@ it('forbids editing an event you do not own', function (): void {
     UserRoleAssignment::create(['user_id' => $stranger->id, 'role' => UserRole::Promoter->value]);
     Promoter::factory()->create(['user_id' => $stranger->id]);
 
-    $this->actingAs($stranger)->get(route('painel.eventos.edit', $event))->assertForbidden();
-    $this->actingAs($stranger)->put(route('painel.eventos.update', $event), [
+    $this->actingAs($stranger)->get(route('dashboard.events.edit', $event))->assertForbidden();
+    $this->actingAs($stranger)->put(route('dashboard.events.update', $event), [
         'title' => 'Hack', 'categories' => [Category::factory()->create()->id], 'is_free' => '1',
         'occurrences' => [['starts_at' => now()->addDay()->format('Y-m-d H:i:s')]],
     ])->assertForbidden();
@@ -66,14 +66,14 @@ it('lets the managing organization edit its promoter event', function (): void {
     $promoter = Promoter::factory()->create(['organization_id' => $org->id]);
     $event = Event::factory()->create(['promoter_id' => $promoter->id]);
 
-    $this->actingAs($orgUser)->get(route('painel.eventos.edit', $event))->assertOk();
+    $this->actingAs($orgUser)->get(route('dashboard.events.edit', $event))->assertOk();
 });
 
 it('soft-deletes an event the owner removes', function (): void {
     [$user, $promoter] = promoterOwner();
     $event = Event::factory()->create(['promoter_id' => $promoter->id]);
 
-    $this->actingAs($user)->delete(route('painel.eventos.destroy', $event))->assertRedirect();
+    $this->actingAs($user)->delete(route('dashboard.events.destroy', $event))->assertRedirect();
 
     $this->assertSoftDeleted('events', ['id' => $event->id]);
 });
@@ -86,6 +86,6 @@ it('forbids deleting an event you do not own', function (): void {
     UserRoleAssignment::create(['user_id' => $stranger->id, 'role' => UserRole::Promoter->value]);
     Promoter::factory()->create(['user_id' => $stranger->id]);
 
-    $this->actingAs($stranger)->delete(route('painel.eventos.destroy', $event))->assertForbidden();
+    $this->actingAs($stranger)->delete(route('dashboard.events.destroy', $event))->assertForbidden();
     $this->assertDatabaseHas('events', ['id' => $event->id, 'deleted_at' => null]);
 });

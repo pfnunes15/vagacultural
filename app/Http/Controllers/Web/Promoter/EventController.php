@@ -89,7 +89,7 @@ class EventController extends Controller
             ? 'Evento publicado! Já está visível na agenda.'
             : 'Evento submetido. Ficará visível após aprovação de um administrador.';
 
-        return redirect()->route('painel.eventos.index')->with('status', $message);
+        return redirect()->route('dashboard.events.index')->with('status', $message);
     }
 
     public function edit(Event $event): View
@@ -123,7 +123,7 @@ class EventController extends Controller
             $request->ticketTiers(),
         );
 
-        return redirect()->route('painel.eventos.index')->with('status', 'Evento atualizado.');
+        return redirect()->route('dashboard.events.index')->with('status', 'Evento atualizado.');
     }
 
     public function destroy(Event $event): RedirectResponse
@@ -132,6 +132,6 @@ class EventController extends Controller
 
         $event->delete();
 
-        return redirect()->route('painel.eventos.index')->with('status', 'Evento removido.');
+        return redirect()->route('dashboard.events.index')->with('status', 'Evento removido.');
     }
 }

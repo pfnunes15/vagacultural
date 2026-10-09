@@ -20,9 +20,9 @@ function userWithRole(UserRole $role): User
 it('lets a registered user apply to become a promoter', function (): void {
     $user = userWithRole(UserRole::User);
 
-    $this->actingAs($user)->get('/promotor/candidatura')->assertOk();
+    $this->actingAs($user)->get('/become-promoter')->assertOk();
 
-    $this->actingAs($user)->post('/promotor/candidatura', [
+    $this->actingAs($user)->post('/become-promoter', [
         'proposed_name' => 'Associação Cultural do Norte',
         'message' => 'Organizamos concertos mensais.',
     ])->assertRedirect(route('events.index'));
@@ -38,7 +38,7 @@ it('blocks a second pending application', function (): void {
     $user = userWithRole(UserRole::User);
     $user->promoterRequests()->create(['proposed_name' => 'X', 'status' => PromoterRequestStatus::Pending->value]);
 
-    $this->actingAs($user)->post('/promotor/candidatura', ['proposed_name' => 'Y'])
+    $this->actingAs($user)->post('/become-promoter', ['proposed_name' => 'Y'])
         ->assertSessionHasErrors('proposed_name');
 
     expect(PromoterRequest::where('user_id', $user->id)->count())->toBe(1);
@@ -48,7 +48,7 @@ it('redirects an existing promoter away from the application form', function ():
     $user = userWithRole(UserRole::Promoter);
     Promoter::factory()->create(['user_id' => $user->id]);
 
-    $this->actingAs($user)->get('/promotor/candidatura')->assertRedirect(route('painel.eventos.index'));
+    $this->actingAs($user)->get('/become-promoter')->assertRedirect(route('dashboard.events.index'));
 });
 
 it('provisions promoter profile and role when an admin approves', function (): void {
@@ -94,5 +94,5 @@ it('marks a request rejected with notes', function (): void {
 });
 
 it('keeps the promoter requests queue admin-only', function (): void {
-    $this->actingAs(userWithRole(UserRole::Promoter))->get('/admin/promotores/pedidos')->assertForbidden();
+    $this->actingAs(userWithRole(UserRole::Promoter))->get('/admin/promoters/requests')->assertForbidden();
 });

@@ -28,14 +28,14 @@ function roleUser(UserRole $role): User
 
 it('blocks non-admins from the admin center', function (): void {
     $this->actingAs(roleUser(UserRole::User))->get('/admin')->assertForbidden();
-    $this->actingAs(roleUser(UserRole::Promoter))->get('/admin/utilizadores')->assertForbidden();
+    $this->actingAs(roleUser(UserRole::Promoter))->get('/admin/users')->assertForbidden();
 });
 
 it('opens the dashboard, users list and system status for an admin', function (): void {
     $admin = admin();
     $this->actingAs($admin)->get('/admin')->assertOk();
-    $this->actingAs($admin)->get('/admin/utilizadores')->assertOk();
-    $this->actingAs($admin)->get('/admin/sistema')->assertOk()->assertSee('Base de dados');
+    $this->actingAs($admin)->get('/admin/users')->assertOk();
+    $this->actingAs($admin)->get('/admin/system')->assertOk()->assertSee('Base de dados');
 });
 
 it('assigns roles to a user', function (): void {
@@ -85,7 +85,7 @@ it('lets an admin impersonate a promoter and return', function (): void {
 
     $this->actingAs($admin)
         ->post(route('admin.users.impersonate', $promoterUser))
-        ->assertRedirect(route('painel.eventos.index'));
+        ->assertRedirect(route('dashboard.events.index'));
 
     expect(auth()->id())->toBe($promoterUser->id)
         ->and(session()->has('impersonator_id'))->toBeTrue();
@@ -110,8 +110,8 @@ it('approves pending events from the admin area', function (): void {
     $admin = admin();
     $event = Event::factory()->create(['status' => EventStatus::Pending]);
 
-    $this->actingAs($admin)->get('/admin/eventos/pendentes')->assertOk()->assertSee($event->title);
-    $this->actingAs($admin)->post(route('admin.eventos.approve', $event))->assertRedirect();
+    $this->actingAs($admin)->get('/admin/events/pending')->assertOk()->assertSee($event->title);
+    $this->actingAs($admin)->post(route('admin.events.approve', $event))->assertRedirect();
 
     expect($event->fresh()->status)->toBe(EventStatus::Published);
 });

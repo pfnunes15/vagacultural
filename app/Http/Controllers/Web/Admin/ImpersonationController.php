@@ -22,7 +22,7 @@ class ImpersonationController extends Controller
             return back()->withErrors(['impersonate' => $e->getMessage()]);
         }
 
-        return redirect()->route('painel.eventos.index')
+        return redirect()->route('dashboard.events.index')
             ->with('status', "Estás a ver a plataforma como {$user->name}.");
     }
 

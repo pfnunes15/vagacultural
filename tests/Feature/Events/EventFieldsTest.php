@@ -84,14 +84,14 @@ it('accepts a cover image with exact Instagram 1080x1350 dimensions', function (
     [$user, $promoter] = trustedPromoterUser();
     $category = Category::factory()->create();
 
-    $this->actingAs($user)->post('/painel/eventos', [
+    $this->actingAs($user)->post('/dashboard/events', [
         'promoter_id' => $promoter->id,
         'title' => 'Com Capa Correta',
         'categories' => [$category->id],
         'is_free' => '1',
         'cover_image' => UploadedFile::fake()->image('capa.jpg', 1080, 1350),
         'occurrences' => [['starts_at' => now()->addDay()->format('Y-m-d H:i:s')]],
-    ])->assertRedirect(route('painel.eventos.index'));
+    ])->assertRedirect(route('dashboard.events.index'));
 
     $event = Event::latest('id')->first();
     expect($event->title)->toBe('Com Capa Correta')
@@ -104,7 +104,7 @@ it('rejects a cover image with the wrong dimensions', function (): void {
     [$user, $promoter] = trustedPromoterUser();
     $category = Category::factory()->create();
 
-    $this->actingAs($user)->post('/painel/eventos', [
+    $this->actingAs($user)->post('/dashboard/events', [
         'promoter_id' => $promoter->id,
         'title' => 'Capa Errada',
         'categories' => [$category->id],
@@ -120,7 +120,7 @@ it('requires a link when an occurrence is online', function (): void {
     [$user, $promoter] = trustedPromoterUser();
     $category = Category::factory()->create();
 
-    $this->actingAs($user)->post('/painel/eventos', [
+    $this->actingAs($user)->post('/dashboard/events', [
         'promoter_id' => $promoter->id,
         'title' => 'Online sem link',
         'categories' => [$category->id],

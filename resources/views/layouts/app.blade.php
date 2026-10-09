@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('title', 'VAGA — Agenda Cultural')</title>
-    {{-- Marcação neutra/provisória: substituída pelo design final (Blade + Tailwind). --}}
+    {{-- Provisional neutral markup: replaced by the final design (Blade + Tailwind). --}}
     <style>
         :root { color-scheme: light dark; }
         * { box-sizing: border-box; }
@@ -43,7 +43,7 @@
             @auth
                 @php $u = auth()->user(); @endphp
                 @if ($u->isPromoter() || $u->isOrganization() || $u->isAdmin())
-                    <a href="{{ route('painel.eventos.index') }}">Painel</a>
+                    <a href="{{ route('dashboard.events.index') }}">Painel</a>
                 @endif
                 @if (! $u->isPromoter() && ! $u->isOrganization() && ! $u->isAdmin())
                     <a href="{{ route('promoter.apply') }}">Tornar-me promotor</a>

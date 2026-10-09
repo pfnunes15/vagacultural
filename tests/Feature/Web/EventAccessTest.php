@@ -10,7 +10,7 @@ it('shows the public events list to guests', function (): void {
     $event = Event::factory()->published()->create(['title' => 'Concerto de Outono']);
     EventOccurrence::factory()->create(['event_id' => $event->id, 'starts_at' => now()->addDay()]);
 
-    $this->get('/eventos')
+    $this->get('/events')
         ->assertOk()
         ->assertSee('Concerto de Outono');
 });
@@ -19,7 +19,7 @@ it('shows the public calendar to guests', function (): void {
     $event = Event::factory()->published()->create(['title' => 'Exposição Atlântica']);
     EventOccurrence::factory()->create(['event_id' => $event->id, 'starts_at' => now()->addDays(3)]);
 
-    $this->get('/calendario')
+    $this->get('/calendar')
         ->assertOk()
         ->assertSee('Exposição Atlântica');
 });
@@ -57,6 +57,6 @@ it('sends the guest back to the event after logging in', function (): void {
     // hitting the gated page stores the intended url
     $this->get(route('events.show', $event))->assertRedirect(route('login'));
 
-    $this->post('/entrar', ['email' => 'ana@example.pt', 'password' => 'password1234'])
+    $this->post('/login', ['email' => 'ana@example.pt', 'password' => 'password1234'])
         ->assertRedirect(route('events.show', $event));
 });

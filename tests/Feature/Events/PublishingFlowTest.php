@@ -87,13 +87,13 @@ it('creates an event through the promoter dashboard and reports published state'
     $promoter = Promoter::factory()->create(['user_id' => $user->id, 'auto_publish' => true]);
     $category = Category::factory()->create();
 
-    $this->actingAs($user)->post('/painel/eventos', [
+    $this->actingAs($user)->post('/dashboard/events', [
         'promoter_id' => $promoter->id,
         'title' => 'Concerto ao Pôr do Sol',
         'categories' => [$category->id],
         'is_free' => '1',
         'occurrences' => [['starts_at' => now()->addDays(5)->format('Y-m-d H:i:s')]],
-    ])->assertRedirect(route('painel.eventos.index'))->assertSessionHas('status');
+    ])->assertRedirect(route('dashboard.events.index'))->assertSessionHas('status');
 
     $created = Event::latest('id')->first();
     expect($created->title)->toBe('Concerto ao Pôr do Sol')
@@ -106,7 +106,7 @@ it('stops a promoter from posting as a promoter they do not control', function (
     $other = Promoter::factory()->create();
     $category = Category::factory()->create();
 
-    $this->actingAs($user)->post('/painel/eventos', [
+    $this->actingAs($user)->post('/dashboard/events', [
         'promoter_id' => $other->id,
         'title' => 'Intruso',
         'categories' => [$category->id],
@@ -120,14 +120,14 @@ it('stops a promoter from posting as a promoter they do not control', function (
 it('blocks a normal user from the promoter dashboard', function (): void {
     $user = makeUserWithRole(UserRole::User);
 
-    $this->actingAs($user)->get('/painel/eventos')->assertForbidden();
+    $this->actingAs($user)->get('/dashboard/events')->assertForbidden();
 });
 
 it('lets an admin approve a pending event over HTTP', function (): void {
     $admin = makeUserWithRole(UserRole::Admin);
     $event = Event::factory()->create(['status' => EventStatus::Pending]);
 
-    $this->actingAs($admin)->post(route('admin.eventos.approve', $event))->assertRedirect();
+    $this->actingAs($admin)->post(route('admin.events.approve', $event))->assertRedirect();
 
     expect($event->refresh()->status)->toBe(EventStatus::Published);
 });
@@ -138,12 +138,12 @@ it('lets an organization create events only when it has an associated promoter',
 
     // No promoter yet -> cannot create.
     expect($orgUser->can('create', Event::class))->toBeFalse();
-    $this->actingAs($orgUser)->get('/painel/eventos/novo')->assertForbidden();
+    $this->actingAs($orgUser)->get('/dashboard/events/new')->assertForbidden();
 
     // Associate a promoter -> can create.
     Promoter::factory()->create(['organization_id' => $org->id]);
     expect($orgUser->fresh()->can('create', Event::class))->toBeTrue();
-    $this->actingAs($orgUser->fresh())->get('/painel/eventos/novo')->assertOk();
+    $this->actingAs($orgUser->fresh())->get('/dashboard/events/new')->assertOk();
 });
 
 it('lets a promoter with a profile create but not one without', function (): void {

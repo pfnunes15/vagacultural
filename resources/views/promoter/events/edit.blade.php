@@ -5,7 +5,7 @@
         <h1 style="margin-right:auto">Editar evento</h1>
         <span class="tag">{{ $event->status->label() }}</span>
     </div>
-    <form method="POST" action="{{ route('painel.eventos.update', $event) }}" enctype="multipart/form-data" style="max-width:720px">
+    <form method="POST" action="{{ route('dashboard.events.update', $event) }}" enctype="multipart/form-data" style="max-width:720px">
         @csrf
         @method('PUT')
         @include('promoter.events._form', ['event' => $event])
@@ -14,7 +14,7 @@
         </p>
     </form>
 
-    <form method="POST" action="{{ route('painel.eventos.destroy', $event) }}" style="max-width:720px;margin-top:8px"
+    <form method="POST" action="{{ route('dashboard.events.destroy', $event) }}" style="max-width:720px;margin-top:8px"
           onsubmit="return confirm('Remover este evento? Esta ação pode ser revertida por um administrador.')">
         @csrf
         @method('DELETE')

@@ -11,8 +11,8 @@
                     <strong>{{ $event->title }}</strong>
                     <div class="muted">{{ $event->promoter->name }}@if ($org = $event->organization()) · {{ $org->name }}@endif</div>
                 </div>
-                <form method="POST" action="{{ route('admin.eventos.approve', $event) }}">@csrf<button class="btn">Aprovar</button></form>
-                <form method="POST" action="{{ route('admin.eventos.reject', $event) }}">@csrf<button class="btn-ghost">Rejeitar</button></form>
+                <form method="POST" action="{{ route('admin.events.approve', $event) }}">@csrf<button class="btn">Aprovar</button></form>
+                <form method="POST" action="{{ route('admin.events.reject', $event) }}">@csrf<button class="btn-ghost">Rejeitar</button></form>
             </div>
         @endforeach
         <div style="margin-top:16px">{{ $events->links() }}</div>

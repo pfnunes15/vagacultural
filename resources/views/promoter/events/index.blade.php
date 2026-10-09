@@ -4,7 +4,7 @@
     <div style="display:flex;align-items:center;gap:12px">
         <h1 style="margin-right:auto">Os meus eventos</h1>
         @if ($canCreate)
-            <a class="btn" href="{{ route('painel.eventos.create') }}">Novo evento</a>
+            <a class="btn" href="{{ route('dashboard.events.create') }}">Novo evento</a>
         @endif
     </div>
 
@@ -15,7 +15,7 @@
     @if ($events->isEmpty())
         <div class="card">
             Ainda não tens eventos.
-            @if ($canCreate)<a href="{{ route('painel.eventos.create') }}">Cria o primeiro</a>.@endif
+            @if ($canCreate)<a href="{{ route('dashboard.events.create') }}">Cria o primeiro</a>.@endif
         </div>
     @else
         <table style="width:100%;border-collapse:collapse;margin-top:12px">
@@ -28,7 +28,7 @@
                     <td style="padding:8px 6px">{{ $event->title }}</td>
                     <td class="muted">{{ $event->promoter->name }}</td>
                     <td><span class="tag">{{ $event->status->label() }}</span></td>
-                    <td><a href="{{ route('painel.eventos.edit', $event) }}">Editar</a></td>
+                    <td><a href="{{ route('dashboard.events.edit', $event) }}">Editar</a></td>
                 </tr>
             @endforeach
             </tbody>

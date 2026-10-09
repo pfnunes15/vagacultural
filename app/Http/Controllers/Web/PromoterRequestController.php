@@ -20,7 +20,7 @@ class PromoterRequestController extends Controller
         $user = $request->user();
 
         if ($user->isPromoter()) {
-            return redirect()->route('painel.eventos.index');
+            return redirect()->route('dashboard.events.index');
         }
 
         return view('promoter-request.create', [
