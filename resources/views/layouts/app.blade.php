@@ -36,7 +36,14 @@
             <a href="{{ route('events.index') }}">Eventos</a>
             <a href="{{ route('events.calendar') }}">Calendário</a>
             @auth
-                <span class="muted">{{ auth()->user()->name }}</span>
+                @php $u = auth()->user(); @endphp
+                @if ($u->isPromoter() || $u->isOrganization() || $u->isAdmin())
+                    <a href="{{ route('painel.eventos.index') }}">Painel</a>
+                @endif
+                @if ($u->isAdmin())
+                    <a href="{{ route('admin.eventos.pending') }}">Pendentes</a>
+                @endif
+                <span class="muted">{{ $u->name }}</span>
                 <form method="POST" action="{{ route('logout') }}" style="margin:0">@csrf<button class="btn-ghost">Sair</button></form>
             @else
                 <a href="{{ route('login') }}">Entrar</a>
