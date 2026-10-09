@@ -7,6 +7,7 @@ namespace App\Services\Events;
 use App\Enums\EventStatus;
 use App\Models\Event;
 use App\Models\Promoter;
+use App\Models\Tag;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -36,6 +37,8 @@ class EventWorkflow
      * @param  array<string, mixed>  $attributes  validated event fields
      * @param  list<int>  $categoryIds
      * @param  list<array<string, mixed>>  $occurrences
+     * @param  list<string>  $tagNames
+     * @param  list<array<string, mixed>>  $ticketTiers
      */
     public function submit(
         Promoter $promoter,
@@ -43,8 +46,10 @@ class EventWorkflow
         array $categoryIds,
         array $occurrences,
         User $submitter,
+        array $tagNames = [],
+        array $ticketTiers = [],
     ): Event {
-        return DB::transaction(function () use ($promoter, $attributes, $categoryIds, $occurrences, $submitter): Event {
+        return DB::transaction(function () use ($promoter, $attributes, $categoryIds, $occurrences, $submitter, $tagNames, $ticketTiers): Event {
             $status = $this->initialStatusFor($promoter);
 
             $event = $promoter->events()->create([
@@ -64,12 +69,44 @@ class EventWorkflow
                 );
             }
 
+            $event->tags()->sync($this->resolveTagIds($tagNames));
+
             foreach ($occurrences as $occurrence) {
                 $event->occurrences()->create($occurrence);
             }
 
+            foreach ($ticketTiers as $i => $tier) {
+                $event->ticketTiers()->create([...$tier, 'position' => $i]);
+            }
+
             return $event;
         });
+    }
+
+    /**
+     * Resolve free-text tag names to ids, creating missing tags.
+     *
+     * @param  list<string>  $names
+     * @return list<int>
+     */
+    private function resolveTagIds(array $names): array
+    {
+        $ids = [];
+
+        foreach ($names as $name) {
+            $name = trim($name);
+            if ($name === '') {
+                continue;
+            }
+
+            $tag = Tag::firstOrCreate(
+                ['slug' => Str::slug($name)],
+                ['name' => $name],
+            );
+            $ids[$tag->id] = $tag->id;
+        }
+
+        return array_values($ids);
     }
 
     /** Admin approves a pending event. */

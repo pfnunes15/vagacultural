@@ -28,6 +28,7 @@ return new class extends Migration
             $table->string('cover_image_path')->nullable();
 
             $table->boolean('is_free')->default(false);
+            $table->unsignedTinyInteger('min_age')->nullable()->comment('Minimum age rating (0,3,6,12,14,16,18)');
             $table->decimal('price_from', 8, 2)->nullable();
             $table->string('ticket_url')->nullable();
             $table->string('website')->nullable();

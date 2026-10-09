@@ -43,6 +43,8 @@ class EventController extends Controller
 
         $event->load([
             'categories',
+            'tags',
+            'ticketTiers',
             'promoter.organization',
             'images',
             'occurrences' => fn ($q) => $q->orderBy('starts_at')->with('venue'),

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use App\Enums\AgeRating;
 use App\Enums\EventStatus;
 use Database\Factories\EventFactory;
 use Illuminate\Database\Eloquent\Builder;
@@ -17,6 +18,7 @@ use Illuminate\Support\Carbon;
 
 /**
  * @property EventStatus $status
+ * @property AgeRating|null $min_age
  * @property Carbon|null $published_at
  */
 class Event extends Model
@@ -29,13 +31,14 @@ class Event extends Model
         'title', 'title_en', 'slug', 'summary', 'summary_en',
         'description', 'description_en', 'status', 'is_featured',
         'cover_image_path', 'is_free', 'price_from', 'ticket_url',
-        'website', 'published_at',
+        'website', 'min_age', 'published_at',
     ];
 
     protected function casts(): array
     {
         return [
             'status' => EventStatus::class,
+            'min_age' => AgeRating::class,
             'is_featured' => 'boolean',
             'is_free' => 'boolean',
             'price_from' => 'decimal:2',
@@ -68,6 +71,18 @@ class Event extends Model
     public function categories(): BelongsToMany
     {
         return $this->belongsToMany(Category::class, 'event_category')->withPivot('is_primary');
+    }
+
+    /** @return BelongsToMany<Tag, $this> */
+    public function tags(): BelongsToMany
+    {
+        return $this->belongsToMany(Tag::class, 'event_tag');
+    }
+
+    /** @return HasMany<EventTicketTier, $this> */
+    public function ticketTiers(): HasMany
+    {
+        return $this->hasMany(EventTicketTier::class)->orderBy('position');
     }
 
     /** @return HasMany<EventOccurrence, $this> */

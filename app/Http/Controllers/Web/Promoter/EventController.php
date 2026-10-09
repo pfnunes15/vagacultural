@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Web\Promoter;
 
+use App\Enums\AgeRating;
 use App\Enums\EventStatus;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Web\Event\StoreEventRequest;
@@ -53,6 +54,7 @@ class EventController extends Controller
             'promoters' => $this->access->postableBy(request()->user()),
             'categories' => Category::query()->where('is_active', true)->orderBy('name')->get(),
             'venues' => Venue::query()->where('is_active', true)->orderBy('name')->get(),
+            'ageRatings' => AgeRating::cases(),
         ]);
     }
 
@@ -66,12 +68,20 @@ class EventController extends Controller
             ]);
         }
 
+        $attributes = $request->eventAttributes();
+
+        if ($request->hasFile('cover_image')) {
+            $attributes['cover_image_path'] = $request->file('cover_image')->store('covers', 'public');
+        }
+
         $event = $this->workflow->submit(
             $promoter,
-            $request->eventAttributes(),
+            $attributes,
             $request->categoryIds(),
             $request->occurrences(),
             $request->user(),
+            $request->tagNames(),
+            $request->ticketTiers(),
         );
 
         $message = $event->status === EventStatus::Published

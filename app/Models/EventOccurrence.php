@@ -24,8 +24,9 @@ class EventOccurrence extends Model
     use HasFactory;
 
     protected $fillable = [
-        'event_id', 'venue_id', 'starts_at', 'ends_at',
-        'door_time', 'status', 'notes',
+        'event_id', 'venue_id', 'starts_at', 'ends_at', 'door_time',
+        'status', 'notes', 'is_all_day', 'is_online', 'online_url',
+        'address', 'postal_code',
     ];
 
     protected function casts(): array
@@ -35,7 +36,23 @@ class EventOccurrence extends Model
             'ends_at' => 'datetime',
             'door_time' => 'datetime',
             'status' => OccurrenceStatus::class,
+            'is_all_day' => 'boolean',
+            'is_online' => 'boolean',
         ];
+    }
+
+    /** Human label for where this occurrence takes place. */
+    public function locationLabel(): string
+    {
+        if ($this->is_online) {
+            return 'Online';
+        }
+
+        if ($this->venue !== null) {
+            return $this->venue->name;
+        }
+
+        return $this->address ?? 'Local a anunciar';
     }
 
     /** @return BelongsTo<Event, $this> */

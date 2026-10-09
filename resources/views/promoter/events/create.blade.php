@@ -2,9 +2,9 @@
 @section('title', 'Novo evento — VAGA')
 @section('content')
     <h1>Novo evento</h1>
-    <p class="muted">Formulário provisório — os campos finais serão ajustados. O que importa aqui é o fluxo de submissão.</p>
+    <p class="muted">Formulário provisório (sem design final). Cobre os campos reais de um evento.</p>
 
-    <form method="POST" action="{{ route('painel.eventos.store') }}" style="max-width:640px">
+    <form method="POST" action="{{ route('painel.eventos.store') }}" enctype="multipart/form-data" style="max-width:720px">
         @csrf
         <label for="promoter_id">Publicar como</label>
         <select id="promoter_id" name="promoter_id" required style="width:100%;padding:9px;border:1px solid #cbccc9;border-radius:8px">
@@ -18,20 +18,25 @@
         <input id="title" name="title" value="{{ old('title') }}" required>
         @error('title')<div class="err">{{ $message }}</div>@enderror
 
-        <label for="summary">Resumo</label>
-        <input id="summary" name="summary" value="{{ old('summary') }}">
+        <label for="summary">Descrição curta</label>
+        <input id="summary" name="summary" maxlength="500" value="{{ old('summary') }}">
 
-        <label for="description">Descrição</label>
+        <label for="description">Descrição completa</label>
         <textarea id="description" name="description" rows="5" style="width:100%;padding:9px;border:1px solid #cbccc9;border-radius:8px">{{ old('description') }}</textarea>
 
-        <label style="font-weight:400;display:flex;gap:8px;align-items:center;margin-top:12px">
-            <input type="checkbox" name="is_free" value="1" style="width:auto" @checked(old('is_free')) onchange="document.getElementById('price').disabled=this.checked"> Entrada livre
-        </label>
-        <label for="price">Preço desde (€)</label>
-        <input id="price" name="price_from" type="number" step="0.01" min="0" value="{{ old('price_from') }}">
-        @error('price_from')<div class="err">{{ $message }}</div>@enderror
+        <label for="cover_image">Imagem de capa <span class="muted">(obrigatório 1080×1350 px — formato Instagram 4:5)</span></label>
+        <input id="cover_image" name="cover_image" type="file" accept="image/*">
+        @error('cover_image')<div class="err">{{ $message }}</div>@enderror
 
-        <label>Categorias</label>
+        <label for="min_age">Idade mínima</label>
+        <select id="min_age" name="min_age" style="width:100%;padding:9px;border:1px solid #cbccc9;border-radius:8px">
+            <option value="">— não aplicável —</option>
+            @foreach ($ageRatings as $age)
+                <option value="{{ $age->value }}" @selected(old('min_age')==$age->value)>{{ $age->label() }}</option>
+            @endforeach
+        </select>
+
+        <label>Categorias (uma ou mais)</label>
         <div style="display:flex;flex-wrap:wrap;gap:10px">
             @foreach ($categories as $cat)
                 <label style="font-weight:400;display:flex;gap:6px;align-items:center">
@@ -39,19 +44,57 @@
                 </label>
             @endforeach
         </div>
+        @error('categories')<div class="err">{{ $message }}</div>@enderror
+
+        <label for="tags">Tags <span class="muted">(separadas por vírgula)</span></label>
+        <input id="tags" name="tags" value="{{ old('tags') }}" placeholder="ex: ao ar livre, família, jazz">
 
         <fieldset style="margin-top:16px;border:1px solid #e4dccb;border-radius:8px;padding:12px">
-            <legend>Sessão</legend>
-            <label for="starts">Início</label>
-            <input id="starts" name="occurrences[0][starts_at]" type="datetime-local" required>
-            @error('occurrences.0.starts_at')<div class="err">{{ $message }}</div>@enderror
-            <label for="ends">Fim (opcional)</label>
-            <input id="ends" name="occurrences[0][ends_at]" type="datetime-local">
-            <label for="venue">Local</label>
-            <select id="venue" name="occurrences[0][venue_id]" style="width:100%;padding:9px;border:1px solid #cbccc9;border-radius:8px">
-                <option value="">— sem local —</option>
-                @foreach ($venues as $venue)<option value="{{ $venue->id }}">{{ $venue->name }}</option>@endforeach
-            </select>
+            <legend>Bilhetes</legend>
+            <label style="font-weight:400;display:flex;gap:8px;align-items:center">
+                <input type="checkbox" name="is_free" value="1" style="width:auto" @checked(old('is_free'))> Entrada livre
+            </label>
+            <label for="ticket_url">Link de bilhetes (externo, opcional)</label>
+            <input id="ticket_url" name="ticket_url" type="url" value="{{ old('ticket_url') }}" placeholder="https://">
+            <p class="muted" style="margin-top:10px">Preços por escalão (opcional — pode variar por idade):</p>
+            @for ($i = 0; $i < 3; $i++)
+                <div style="display:flex;gap:8px;margin-bottom:6px;flex-wrap:wrap">
+                    <input name="tiers[{{ $i }}][name]" placeholder="Escalão (ex: Adulto)" style="flex:2;min-width:140px">
+                    <input name="tiers[{{ $i }}][price]" type="number" step="0.01" min="0" placeholder="€" style="flex:1;min-width:80px">
+                    <input name="tiers[{{ $i }}][min_age]" type="number" min="0" placeholder="idade mín." style="flex:1;min-width:90px">
+                    <input name="tiers[{{ $i }}][max_age]" type="number" min="0" placeholder="idade máx." style="flex:1;min-width:90px">
+                </div>
+            @endfor
+        </fieldset>
+
+        <fieldset style="margin-top:16px;border:1px solid #e4dccb;border-radius:8px;padding:12px">
+            <legend>Data e local</legend>
+            <p class="muted">Uma data única, várias datas separadas, ou um intervalo contínuo (marca "dia inteiro" e preenche o fim).</p>
+            @for ($i = 0; $i < 3; $i++)
+                <div style="border:1px dashed #e4dccb;border-radius:8px;padding:10px;margin-bottom:10px">
+                    <div style="display:flex;gap:10px;flex-wrap:wrap">
+                        <div><label>Início @if($i>0)<span class="muted">(opcional)</span>@endif</label><input name="occurrences[{{ $i }}][starts_at]" type="datetime-local" @if($i===0) required @endif></div>
+                        <div><label>Fim</label><input name="occurrences[{{ $i }}][ends_at]" type="datetime-local"></div>
+                        <label style="font-weight:400;display:flex;gap:6px;align-items:center;align-self:flex-end">
+                            <input type="checkbox" name="occurrences[{{ $i }}][is_all_day]" value="1" style="width:auto"> dia inteiro / contínuo
+                        </label>
+                    </div>
+                    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:8px">
+                        <label style="font-weight:400;display:flex;gap:6px;align-items:center">
+                            <input type="checkbox" name="occurrences[{{ $i }}][is_online]" value="1" style="width:auto"> Online
+                        </label>
+                        <input name="occurrences[{{ $i }}][online_url]" type="url" placeholder="Link (se online)" style="flex:1;min-width:160px">
+                    </div>
+                    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:8px">
+                        <select name="occurrences[{{ $i }}][venue_id]" style="flex:1;min-width:160px;padding:9px;border:1px solid #cbccc9;border-radius:8px">
+                            <option value="">— local (opcional) —</option>
+                            @foreach ($venues as $venue)<option value="{{ $venue->id }}">{{ $venue->name }}</option>@endforeach
+                        </select>
+                        <input name="occurrences[{{ $i }}][address]" placeholder="Morada (se não for um local)" style="flex:2;min-width:160px">
+                        <input name="occurrences[{{ $i }}][postal_code]" placeholder="Código postal" style="flex:1;min-width:100px">
+                    </div>
+                </div>
+            @endfor
         </fieldset>
 
         <p style="margin-top:16px"><button type="submit">Submeter evento</button></p>

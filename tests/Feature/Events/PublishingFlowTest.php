@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Enums\EventStatus;
 use App\Enums\UserRole;
+use App\Models\Category;
 use App\Models\Event;
 use App\Models\Organization;
 use App\Models\Promoter;
@@ -84,10 +85,12 @@ it('authorizes update: owner yes, stranger no, managing org yes, admin yes', fun
 it('creates an event through the promoter dashboard and reports published state', function (): void {
     $user = makeUserWithRole(UserRole::Promoter);
     $promoter = Promoter::factory()->create(['user_id' => $user->id, 'auto_publish' => true]);
+    $category = Category::factory()->create();
 
     $this->actingAs($user)->post('/painel/eventos', [
         'promoter_id' => $promoter->id,
         'title' => 'Concerto ao Pôr do Sol',
+        'categories' => [$category->id],
         'is_free' => '1',
         'occurrences' => [['starts_at' => now()->addDays(5)->format('Y-m-d H:i:s')]],
     ])->assertRedirect(route('painel.eventos.index'))->assertSessionHas('status');
@@ -99,10 +102,12 @@ it('stops a promoter from posting as a promoter they do not control', function (
     $user = makeUserWithRole(UserRole::Promoter);
     Promoter::factory()->create(['user_id' => $user->id]);
     $other = Promoter::factory()->create();
+    $category = Category::factory()->create();
 
     $this->actingAs($user)->post('/painel/eventos', [
         'promoter_id' => $other->id,
         'title' => 'Intruso',
+        'categories' => [$category->id],
         'is_free' => '1',
         'occurrences' => [['starts_at' => now()->addDay()->format('Y-m-d H:i:s')]],
     ])->assertSessionHasErrors('promoter_id');
