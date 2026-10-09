@@ -20,7 +20,7 @@ class RegisteredUserController extends Controller
 
     public function store(RegisterRequest $request, RegisterUser $registerUser): RedirectResponse
     {
-        $user = $registerUser->handle($request->only('name', 'email', 'password'));
+        $user = $registerUser->handle($request->only('first_name', 'last_name', 'email', 'password'));
 
         Auth::login($user);
         $request->session()->regenerate();

@@ -7,7 +7,8 @@ use App\Models\User;
 
 it('registers a user through the web form and logs them in', function (): void {
     $this->post('/register', [
-        'name' => 'Rui Gomes',
+        'first_name' => 'Rui',
+        'last_name' => 'Gomes',
         'email' => 'rui@example.pt',
         'password' => 'password1234',
         'password_confirmation' => 'password1234',

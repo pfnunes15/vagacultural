@@ -9,7 +9,8 @@ use Illuminate\Support\Facades\Route;
 
 it('registers a new user with the default role and returns a token', function (): void {
     $response = $this->postJson('/api/v1/auth/register', [
-        'name' => 'Maria Silva',
+        'first_name' => 'Maria',
+        'last_name' => 'Silva',
         'email' => 'maria@example.pt',
         'password' => 'password1234',
         'password_confirmation' => 'password1234',

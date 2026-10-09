@@ -50,6 +50,7 @@
                 @endif
                 <a href="{{ route('my.favorites') }}">Favoritos</a>
                 <a href="{{ route('my.agenda') }}">Agenda</a>
+                <a href="{{ route('my.profile') }}">Perfil</a>
                 @if ($u->isAdmin())
                     <a href="{{ route('admin.dashboard') }}">Admin</a>
                 @endif

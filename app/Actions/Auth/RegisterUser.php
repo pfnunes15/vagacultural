@@ -21,13 +21,14 @@ final class RegisterUser
     public function __construct(private readonly RegistrationMailer $mailer) {}
 
     /**
-     * @param  array{name: string, email: string, password: string}  $data
+     * @param  array{first_name: string, last_name: string, email: string, password: string}  $data
      */
     public function handle(array $data, UserRole $role = UserRole::User): User
     {
         return DB::transaction(function () use ($data, $role): User {
             $user = User::create([
-                'name' => $data['name'],
+                'first_name' => $data['first_name'],
+                'last_name' => $data['last_name'],
                 'email' => $data['email'],
                 'password' => $data['password'],
             ]);

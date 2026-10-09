@@ -82,7 +82,8 @@ class DatabaseSeeder extends Seeder
 
     private function makeUser(string $name, string $email, UserRole $role): User
     {
-        $user = User::factory()->create(['name' => $name, 'email' => $email]);
+        [$first, $last] = array_pad(explode(' ', $name, 2), 2, '');
+        $user = User::factory()->create(['first_name' => $first, 'last_name' => $last, 'email' => $email]);
         UserRoleAssignment::create(['user_id' => $user->id, 'role' => $role->value]);
 
         return $user;

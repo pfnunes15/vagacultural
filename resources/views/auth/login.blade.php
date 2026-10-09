@@ -18,5 +18,6 @@
         </label>
         <p style="margin-top:16px"><button type="submit">Entrar</button></p>
     </form>
+    <p class="muted"><a href="{{ route('password.request') }}">Esqueci-me da palavra-passe</a></p>
     <p class="muted">Ainda não tens conta? <a href="{{ route('register') }}">Regista-te</a>.</p>
 @endsection

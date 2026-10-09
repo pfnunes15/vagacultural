@@ -7,6 +7,7 @@ namespace App\Models;
 use App\Enums\UserRole;
 use Database\Factories\UserFactory;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
@@ -20,7 +21,7 @@ class User extends Authenticatable implements MustVerifyEmail
     use HasApiTokens, HasFactory, Notifiable;
 
     /** @var list<string> */
-    protected $fillable = ['name', 'email', 'password', 'phone', 'avatar_path', 'locale', 'bio'];
+    protected $fillable = ['first_name', 'last_name', 'email', 'password', 'phone', 'avatar_path', 'locale', 'nationality', 'bio'];
 
     /** @var list<string> */
     protected $hidden = ['password', 'remember_token'];
@@ -34,6 +35,16 @@ class User extends Authenticatable implements MustVerifyEmail
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];
+    }
+
+    /**
+     * Full display name, composed from first and last name.
+     *
+     * @return Attribute<string, never>
+     */
+    protected function name(): Attribute
+    {
+        return Attribute::get(fn (): string => trim($this->first_name . ' ' . $this->last_name));
     }
 
     /** @return HasMany<UserRoleAssignment, $this> */

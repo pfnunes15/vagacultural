@@ -23,7 +23,7 @@ class AuthController extends Controller
 {
     public function register(RegisterRequest $request, RegisterUser $registerUser): JsonResponse
     {
-        $user = $registerUser->handle($request->only('name', 'email', 'password'));
+        $user = $registerUser->handle($request->only('first_name', 'last_name', 'email', 'password'));
 
         $token = $user->createToken($request->string('device_name', 'api')->value())->plainTextToken;
 

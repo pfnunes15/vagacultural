@@ -14,6 +14,7 @@ return new class extends Migration
             $table->string('phone', 32)->nullable()->after('email');
             $table->string('avatar_path')->nullable()->after('phone');
             $table->string('locale', 5)->default('pt')->after('avatar_path');
+            $table->string('nationality', 2)->nullable()->comment('ISO 3166-1 alpha-2')->after('locale');
             $table->text('bio')->nullable()->after('locale');
         });
     }
@@ -21,7 +22,7 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('users', function (Blueprint $table): void {
-            $table->dropColumn(['phone', 'avatar_path', 'locale', 'bio']);
+            $table->dropColumn(['phone', 'avatar_path', 'locale', 'nationality', 'bio']);
         });
     }
 };

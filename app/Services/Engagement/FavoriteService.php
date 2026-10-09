@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Services\Engagement;
 
+use App\Models\Category;
 use App\Models\Favorite;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Model;
@@ -35,6 +36,22 @@ class FavoriteService
         $favorite->save();
 
         return true;
+    }
+
+    /**
+     * Replace the user's favorite categories with the given set.
+     *
+     * @param  list<int>  $categoryIds
+     */
+    public function syncCategories(User $user, array $categoryIds): void
+    {
+        $type = (new Category)->getMorphClass();
+
+        $user->favorites()->where('favoritable_type', $type)->delete();
+
+        foreach (array_unique($categoryIds) as $id) {
+            $user->favorites()->create(['favoritable_type' => $type, 'favoritable_id' => $id]);
+        }
     }
 
     public function has(User $user, Model $favoritable): bool
