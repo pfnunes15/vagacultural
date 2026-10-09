@@ -20,6 +20,7 @@ class PromoterRequestRequest extends FormRequest
     {
         return [
             'proposed_name' => ['required', 'string', 'max:160'],
+            'requested_type' => ['nullable', 'in:promoter,organization'],
             'email' => ['nullable', 'email', 'max:255'],
             'phone' => ['nullable', 'string', 'max:32'],
             'website' => ['nullable', 'url', 'max:255'],

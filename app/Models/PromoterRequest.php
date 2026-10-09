@@ -12,7 +12,8 @@ class PromoterRequest extends Model
 {
     protected $fillable = [
         'user_id', 'proposed_name', 'email', 'phone', 'website', 'message',
-        'status', 'reviewed_by', 'reviewed_at', 'review_notes', 'created_promoter_id',
+        'requested_type', 'status', 'reviewed_by', 'reviewed_at', 'review_notes',
+        'created_promoter_id', 'created_organization_id',
     ];
 
     protected function casts(): array
@@ -39,5 +40,11 @@ class PromoterRequest extends Model
     public function promoter(): BelongsTo
     {
         return $this->belongsTo(Promoter::class, 'created_promoter_id');
+    }
+
+    /** @return BelongsTo<Organization, $this> */
+    public function organization(): BelongsTo
+    {
+        return $this->belongsTo(Organization::class, 'created_organization_id');
     }
 }

@@ -7,19 +7,23 @@ namespace App\Services\Promoters;
 use App\Enums\PromoterRequestStatus;
 use App\Enums\UserRole;
 use App\Models\EmailLog;
+use App\Models\Organization;
 use App\Models\Promoter;
 use App\Models\PromoterRequest;
 use App\Models\User;
 use App\Models\UserRoleAssignment;
+use App\Notifications\OrganizationActivated;
 use App\Notifications\PromoterActivated;
 use App\Notifications\PromoterRejected;
+use App\Support\Slug;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use RuntimeException;
 
 /**
- * Onboarding of new promoters: a registered user applies, an admin approves
- * (which provisions the promoter profile and grants the role) or rejects.
+ * Onboarding of new promoters and organizations: a registered user applies,
+ * and an admin decides whether to activate them as a promoter or as an
+ * organization (or rejects). The applicant may hint a preferred type.
  */
 class PromoterOnboarding
 {
@@ -28,13 +32,15 @@ class PromoterOnboarding
      */
     public function requestFor(User $user, array $data): PromoterRequest
     {
-        if ($user->isPromoter()) {
-            throw new RuntimeException('Já és promotor.');
+        if ($user->isPromoter() || $user->isOrganization()) {
+            throw new RuntimeException('Já tens um perfil de promotor ou organização.');
         }
 
         if ($this->hasPendingRequest($user)) {
-            throw new RuntimeException('Já tens uma candidatura a promotor pendente.');
+            throw new RuntimeException('Já tens uma candidatura pendente.');
         }
+
+        $type = $data['requested_type'] ?? null;
 
         return $user->promoterRequests()->create([
             'proposed_name' => $data['proposed_name'],
@@ -42,6 +48,7 @@ class PromoterOnboarding
             'phone' => $data['phone'] ?? null,
             'website' => $data['website'] ?? null,
             'message' => $data['message'] ?? null,
+            'requested_type' => in_array($type, ['promoter', 'organization'], true) ? $type : null,
             'status' => PromoterRequestStatus::Pending->value,
         ]);
     }
@@ -96,6 +103,51 @@ class PromoterOnboarding
             ]);
 
             return $promoter;
+        });
+    }
+
+    /**
+     * Approve a pending request as an ORGANIZATION: create the organization
+     * owned by the applicant, grant the role, link it back and notify.
+     */
+    public function approveAsOrganization(PromoterRequest $request, User $admin): Organization
+    {
+        return DB::transaction(function () use ($request, $admin): Organization {
+            $organization = Organization::create([
+                'user_id' => $request->user_id,
+                'name' => $request->proposed_name,
+                'slug' => Slug::unique(Organization::class, $request->proposed_name),
+                'email' => $request->email,
+                'phone' => $request->phone,
+                'website' => $request->website,
+                'is_active' => true,
+            ]);
+
+            UserRoleAssignment::firstOrCreate([
+                'user_id' => $request->user_id,
+                'role' => UserRole::Organization->value,
+            ]);
+
+            $request->update([
+                'status' => PromoterRequestStatus::Approved->value,
+                'reviewed_by' => $admin->id,
+                'reviewed_at' => now(),
+                'created_organization_id' => $organization->id,
+            ]);
+
+            $request->user?->notify(new OrganizationActivated($organization));
+
+            EmailLog::create([
+                'user_id' => $request->user_id,
+                'type' => 'organization_activation',
+                'recipient' => (string) ($request->user->email ?? $request->email),
+                'subject' => 'Organização ativada',
+                'status' => 'sent',
+                'sent_by' => $admin->id,
+                'sent_at' => now(),
+            ]);
+
+            return $organization;
         });
     }
 

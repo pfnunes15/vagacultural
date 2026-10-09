@@ -8,6 +8,7 @@ use App\Models\Promoter;
 use App\Models\PromoterRequest;
 use App\Models\User;
 use App\Models\UserRoleAssignment;
+use App\Notifications\OrganizationActivated;
 use App\Notifications\PromoterActivated;
 use App\Notifications\PromoterRejected;
 use Illuminate\Support\Facades\Notification;
@@ -128,4 +129,45 @@ it('notifies the applicant when an admin rejects', function (): void {
     $this->actingAs($admin)->post(route('admin.promoters.requests.reject', $request), ['notes' => 'Fora de âmbito'])->assertRedirect();
 
     Notification::assertSentTo($applicant, PromoterRejected::class);
+});
+
+it('lets an admin activate a request as an organization', function (): void {
+    Notification::fake();
+    $admin = userWithRole(UserRole::Admin);
+    $applicant = userWithRole(UserRole::User);
+    $request = $applicant->promoterRequests()->create([
+        'proposed_name' => 'Casa da Música',
+        'requested_type' => 'organization',
+        'status' => PromoterRequestStatus::Pending->value,
+    ]);
+
+    $this->actingAs($admin)
+        ->post(route('admin.promoters.requests.approve-organization', $request))
+        ->assertRedirect();
+
+    $applicant->refresh();
+    expect($applicant->isOrganization())->toBeTrue()
+        ->and($applicant->ownedOrganization)->not->toBeNull()
+        ->and($applicant->ownedOrganization->name)->toBe('Casa da Música');
+
+    $request->refresh();
+    expect($request->status)->toBe(PromoterRequestStatus::Approved)
+        ->and($request->created_organization_id)->toBe($applicant->ownedOrganization->id);
+
+    Notification::assertSentTo($applicant, OrganizationActivated::class);
+    $this->assertDatabaseHas('email_logs', ['user_id' => $applicant->id, 'type' => 'organization_activation']);
+});
+
+it('stores the applicant type hint on the request', function (): void {
+    $user = userWithRole(UserRole::User);
+
+    $this->actingAs($user)->post('/become-promoter', [
+        'proposed_name' => 'Entidade X',
+        'requested_type' => 'organization',
+    ])->assertRedirect();
+
+    $this->assertDatabaseHas('promoter_requests', [
+        'user_id' => $user->id,
+        'requested_type' => 'organization',
+    ]);
 });

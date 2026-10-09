@@ -18,11 +18,13 @@ return new class extends Migration
             $table->string('phone', 32)->nullable();
             $table->string('website')->nullable();
             $table->text('message')->nullable();
+            $table->string('requested_type', 16)->nullable()->comment('Applicant hint: promoter|organization; admin decides');
             $table->string('status', 16)->default('pending');
             $table->foreignId('reviewed_by')->nullable()->constrained('users')->nullOnDelete();
             $table->timestamp('reviewed_at')->nullable();
             $table->text('review_notes')->nullable();
             $table->foreignId('created_promoter_id')->nullable()->constrained('promoters')->nullOnDelete();
+            $table->foreignId('created_organization_id')->nullable()->constrained('organizations')->nullOnDelete();
             $table->timestamps();
 
             $table->index('status');

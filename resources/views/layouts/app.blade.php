@@ -48,7 +48,7 @@
                     <a href="{{ route('dashboard.events.index') }}">Painel</a>
                 @endif
                 @if (! $u->isPromoter() && ! $u->isOrganization() && ! $u->isAdmin())
-                    <a href="{{ route('promoter.apply') }}">Tornar-me promotor</a>
+                    <a href="{{ route('promoter.apply') }}">Divulgar eventos</a>
                 @endif
                 <a href="{{ route('my.recommendations') }}">Para ti</a>
                 <a href="{{ route('my.favorites') }}">Favoritos</a>

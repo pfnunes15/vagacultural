@@ -144,5 +144,6 @@ Route::middleware(['auth', 'role:admin'])
         // Promoter onboarding requests
         Route::get('promoters/requests', [AdminPromoterRequestController::class, 'index'])->name('promoters.requests');
         Route::post('promoters/requests/{promoterRequest}/approve', [AdminPromoterRequestController::class, 'approve'])->name('promoters.requests.approve');
+        Route::post('promoters/requests/{promoterRequest}/approve-organization', [AdminPromoterRequestController::class, 'approveOrganization'])->name('promoters.requests.approve-organization');
         Route::post('promoters/requests/{promoterRequest}/reject', [AdminPromoterRequestController::class, 'reject'])->name('promoters.requests.reject');
     });

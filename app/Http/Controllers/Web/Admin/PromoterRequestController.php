@@ -31,7 +31,14 @@ class PromoterRequestController extends Controller
     {
         $promoter = $this->onboarding->approve($promoterRequest, $request->user());
 
-        return back()->with('status', "Promotor \"{$promoter->name}\" criado e papel atribuído.");
+        return back()->with('status', "Promotor \"{$promoter->name}\" ativado.");
+    }
+
+    public function approveOrganization(Request $request, PromoterRequest $promoterRequest): RedirectResponse
+    {
+        $organization = $this->onboarding->approveAsOrganization($promoterRequest, $request->user());
+
+        return back()->with('status', "Organização \"{$organization->name}\" ativada.");
     }
 
     public function reject(Request $request, PromoterRequest $promoterRequest): RedirectResponse
