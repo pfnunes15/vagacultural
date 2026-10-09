@@ -47,20 +47,25 @@ class PublicEventService
     {
         $term = $search !== null ? trim($search) : null;
 
+        // Full-text, typo-tolerant search via Scout (Meilisearch) when a term is given.
+        if ($term !== null && $term !== '') {
+            return Event::search($term)
+                ->query(fn ($q) => $q->published()
+                    ->whereHas('occurrences', fn ($o) => $o->where('starts_at', '>=', now()))
+                    ->with([
+                        'categories',
+                        'promoter',
+                        'occurrences' => fn ($o) => $o->upcoming()->with('venue'),
+                    ]))
+                ->paginate($perPage)
+                ->withQueryString();
+        }
+
         return $this->baseUpcoming()
             ->when($categorySlug, fn ($q) => $q->whereHas(
                 'categories',
                 fn ($c) => $c->where('slug', $categorySlug),
             ))
-            ->when($term, function ($q) use ($term): void {
-                $like = '%' . $term . '%';
-                $q->where(function ($w) use ($like): void {
-                    // LIKE on the JSON column matches any locale's value.
-                    $w->where('title', 'like', $like)
-                        ->orWhere('summary', 'like', $like)
-                        ->orWhereHas('promoter', fn ($p) => $p->where('name', 'like', $like));
-                });
-            })
             ->paginate($perPage)
             ->withQueryString();
     }

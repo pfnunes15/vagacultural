@@ -18,6 +18,9 @@ services:
       DB_USERNAME: ${DB_USERNAME:-vaga}
       DB_PASSWORD: ${DB_PASSWORD:-secret}
       REDIS_HOST: redis
+      SCOUT_DRIVER: meilisearch
+      MEILISEARCH_HOST: http://meilisearch:7700
+      MEILISEARCH_KEY: masterKey
       CACHE_STORE: redis
       SESSION_DRIVER: redis
       QUEUE_CONNECTION: redis
@@ -25,6 +28,8 @@ services:
       db:
         condition: service_healthy
       redis:
+        condition: service_started
+      meilisearch:
         condition: service_started
     networks: [vaga]
 
@@ -59,6 +64,16 @@ services:
       retries: 20
     networks: [vaga]
 
+  meilisearch:
+    image: getmeili/meilisearch:v1.10
+    restart: unless-stopped
+    environment:
+      MEILI_MASTER_KEY: masterKey
+      MEILI_ENV: development
+    volumes:
+      - vaga-meili:/meili_data
+    networks: [vaga]
+
   redis:
     image: redis:7-alpine
     restart: unless-stopped
@@ -69,6 +84,7 @@ services:
 volumes:
   vaga-db:
   vaga-redis:
+  vaga-meili:
 
 networks:
   vaga:

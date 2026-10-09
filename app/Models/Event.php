@@ -15,6 +15,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Carbon;
+use Laravel\Scout\Searchable;
 use Spatie\Translatable\HasTranslations;
 
 /**
@@ -25,7 +26,7 @@ use Spatie\Translatable\HasTranslations;
 class Event extends Model
 {
     /** @use HasFactory<EventFactory> */
-    use HasFactory, HasTranslations, SoftDeletes;
+    use HasFactory, HasTranslations, Searchable, SoftDeletes;
 
     /** @var list<string> */
     public array $translatable = ['title', 'summary', 'description'];
@@ -114,5 +115,37 @@ class Event extends Model
     public function getRouteKeyName(): string
     {
         return 'slug';
+    }
+
+    /**
+     * Data indexed in the search engine. Translatable fields are flattened
+     * across all locales so a query in any language matches.
+     *
+     * @return array<string, mixed>
+     */
+    public function toSearchableArray(): array
+    {
+        $flatten = fn (array $translations): string => trim(implode(' ', array_filter(array_values($translations))));
+
+        return [
+            'id' => $this->id,
+            'slug' => $this->slug,
+            'title' => $flatten($this->getTranslations('title')),
+            'summary' => $flatten($this->getTranslations('summary')),
+            'description' => $flatten($this->getTranslations('description')),
+            'categories' => $this->categories->flatMap(fn ($c) => array_values($c->getTranslations('name')))->implode(' '),
+            'tags' => $this->tags->pluck('name')->implode(' '),
+            'promoter' => $this->promoter?->name,
+            'venues' => $this->occurrences->map(fn ($o) => $o->venue?->name)->filter()->implode(' '),
+            'next_occurrence' => $this->occurrences->min('starts_at')?->timestamp,
+        ];
+    }
+
+    /** Only publicly visible events are indexed. */
+    public function shouldBeSearchable(): bool
+    {
+        return $this->status === EventStatus::Published
+            && $this->published_at !== null
+            && $this->published_at->lte(now());
     }
 }

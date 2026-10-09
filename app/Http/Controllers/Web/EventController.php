@@ -7,19 +7,27 @@ namespace App\Http\Controllers\Web;
 use App\Http\Controllers\Controller;
 use App\Models\Category;
 use App\Models\Event;
+use App\Services\Analytics\ActivityLogger;
 use App\Services\Events\PublicEventService;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
 class EventController extends Controller
 {
-    public function __construct(private readonly PublicEventService $events) {}
+    public function __construct(
+        private readonly PublicEventService $events,
+        private readonly ActivityLogger $activity,
+    ) {}
 
     /** Public: browsable list of upcoming events. */
     public function index(Request $request): View
     {
         $category = $request->string('category')->value() ?: null;
         $search = $request->string('q')->value() ?: null;
+
+        if ($search !== null) {
+            $this->activity->log('search', properties: ['q' => $search]);
+        }
 
         return view('events.index', [
             'events' => $this->events->upcomingList($category, $search),
@@ -54,6 +62,8 @@ class EventController extends Controller
     public function show(Event $event): View
     {
         abort_unless($event->status->isPubliclyVisible(), 404);
+
+        $this->activity->log('event.view', $event);
 
         $event->load([
             'categories',

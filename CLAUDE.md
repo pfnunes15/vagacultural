@@ -24,6 +24,9 @@ composer stan         # PHPStan/Larastan
 composer test         # Pest
 
 ./vendor/bin/pest     # testes diretamente
+
+# pesquisa (Meilisearch via Scout) — indexar eventos
+docker compose run --rm app php artisan scout:import "App\\Models\\Event"
 ```
 > Nota: o host pode ter MySQL/artisan serve a ocupar 3306/8000/8080 — por isso os defaults são **8111** (app) e **3307** (db). Correr migrations **dentro do contentor** (`DB_HOST=db`) evita colidir com o MySQL local.
 
