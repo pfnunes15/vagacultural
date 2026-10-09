@@ -15,6 +15,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Carbon;
+use Spatie\Translatable\HasTranslations;
 
 /**
  * @property EventStatus $status
@@ -24,12 +25,14 @@ use Illuminate\Support\Carbon;
 class Event extends Model
 {
     /** @use HasFactory<EventFactory> */
-    use HasFactory, SoftDeletes;
+    use HasFactory, HasTranslations, SoftDeletes;
+
+    /** @var list<string> */
+    public array $translatable = ['title', 'summary', 'description'];
 
     protected $fillable = [
         'promoter_id', 'submitted_by',
-        'title', 'title_en', 'slug', 'summary', 'summary_en',
-        'description', 'description_en', 'status', 'is_featured',
+        'title', 'slug', 'summary', 'description', 'status', 'is_featured',
         'cover_image_path', 'is_free', 'price_from', 'ticket_url',
         'website', 'min_age', 'published_at',
     ];

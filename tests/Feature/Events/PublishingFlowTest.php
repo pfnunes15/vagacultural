@@ -95,7 +95,9 @@ it('creates an event through the promoter dashboard and reports published state'
         'occurrences' => [['starts_at' => now()->addDays(5)->format('Y-m-d H:i:s')]],
     ])->assertRedirect(route('painel.eventos.index'))->assertSessionHas('status');
 
-    $this->assertDatabaseHas('events', ['title' => 'Concerto ao Pôr do Sol', 'status' => 'published']);
+    $created = Event::latest('id')->first();
+    expect($created->title)->toBe('Concerto ao Pôr do Sol')
+        ->and($created->status->value)->toBe('published');
 });
 
 it('stops a promoter from posting as a promoter they do not control', function (): void {

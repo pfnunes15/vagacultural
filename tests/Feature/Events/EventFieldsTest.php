@@ -93,8 +93,8 @@ it('accepts a cover image with exact Instagram 1080x1350 dimensions', function (
         'occurrences' => [['starts_at' => now()->addDay()->format('Y-m-d H:i:s')]],
     ])->assertRedirect(route('painel.eventos.index'));
 
-    $event = Event::where('title', 'Com Capa Correta')->first();
-    expect($event)->not->toBeNull()
+    $event = Event::latest('id')->first();
+    expect($event->title)->toBe('Com Capa Correta')
         ->and($event->cover_image_path)->not->toBeNull();
     Storage::disk('public')->assertExists($event->cover_image_path);
 });

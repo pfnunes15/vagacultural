@@ -15,13 +15,10 @@ return new class extends Migration
             $table->foreignId('promoter_id')->comment('Every event is owned by a promoter; the organization is reached via the promoter')->constrained('promoters')->cascadeOnDelete();
             $table->foreignId('submitted_by')->nullable()->constrained('users')->nullOnDelete();
 
-            $table->string('title');
-            $table->string('title_en')->nullable();
+            $table->json('title');
             $table->string('slug')->unique();
-            $table->string('summary', 500)->nullable();
-            $table->string('summary_en', 500)->nullable();
-            $table->longText('description')->nullable();
-            $table->longText('description_en')->nullable();
+            $table->json('summary')->nullable();
+            $table->json('description')->nullable();
 
             $table->string('status', 16)->default('draft');
             $table->boolean('is_featured')->default(false);

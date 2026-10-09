@@ -10,14 +10,18 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Spatie\Translatable\HasTranslations;
 
 class Category extends Model
 {
     /** @use HasFactory<CategoryFactory> */
-    use HasFactory;
+    use HasFactory, HasTranslations;
+
+    /** @var list<string> */
+    public array $translatable = ['name'];
 
     protected $fillable = [
-        'parent_id', 'name', 'name_en', 'slug', 'description',
+        'parent_id', 'name', 'slug', 'description',
         'color', 'icon', 'position', 'is_active',
     ];
 
