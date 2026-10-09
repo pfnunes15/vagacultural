@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasManyThrough;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 
 class Organization extends Model
 {
@@ -49,6 +50,12 @@ class Organization extends Model
     public function events(): HasManyThrough
     {
         return $this->hasManyThrough(Event::class, Promoter::class);
+    }
+
+    /** @return MorphMany<Follow, $this> */
+    public function followers(): MorphMany
+    {
+        return $this->morphMany(Follow::class, 'followable');
     }
 
     public function getRouteKeyName(): string

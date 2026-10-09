@@ -32,5 +32,7 @@ Route::prefix('v1')->group(function (): void {
         Route::post('events/{event:slug}/favorite', [EngagementController::class, 'toggleFavorite'])->name('api.events.favorite');
         Route::get('me/agenda', [EngagementController::class, 'agenda'])->name('api.me.agenda');
         Route::post('events/{event:slug}/agenda', [EngagementController::class, 'toggleAgenda'])->name('api.events.agenda');
+        Route::post('promoters/{promoter:slug}/follow', [EngagementController::class, 'followPromoter'])->name('api.promoters.follow');
+        Route::post('organizations/{organization:slug}/follow', [EngagementController::class, 'followOrganization'])->name('api.organizations.follow');
     });
 });

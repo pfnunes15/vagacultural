@@ -7,8 +7,11 @@ namespace App\Http\Controllers\Api\V1;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\EventResource;
 use App\Models\Event;
+use App\Models\Organization;
+use App\Models\Promoter;
 use App\Services\Engagement\AgendaService;
 use App\Services\Engagement\FavoriteService;
+use App\Services\Engagement\FollowService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
@@ -18,6 +21,7 @@ class EngagementController extends Controller
     public function __construct(
         private readonly FavoriteService $favorites,
         private readonly AgendaService $agenda,
+        private readonly FollowService $follows,
     ) {}
 
     public function favorites(Request $request): AnonymousResourceCollection
@@ -63,5 +67,15 @@ class EngagementController extends Controller
         $this->agenda->add($user, $event);
 
         return response()->json(['in_agenda' => true]);
+    }
+
+    public function followPromoter(Request $request, Promoter $promoter): JsonResponse
+    {
+        return response()->json(['following' => $this->follows->toggle($request->user(), $promoter)]);
+    }
+
+    public function followOrganization(Request $request, Organization $organization): JsonResponse
+    {
+        return response()->json(['following' => $this->follows->toggle($request->user(), $organization)]);
     }
 }

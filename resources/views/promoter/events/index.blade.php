@@ -3,6 +3,7 @@
 @section('content')
     <div style="display:flex;align-items:center;gap:12px">
         <h1 style="margin-right:auto">Os meus eventos</h1>
+        <a class="btn-ghost" href="{{ route('dashboard.profile') }}">Perfil público</a>
         @if ($canCreate)
             <a class="btn" href="{{ route('dashboard.events.create') }}">Novo evento</a>
         @endif

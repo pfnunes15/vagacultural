@@ -16,9 +16,11 @@ use App\Http\Controllers\Web\Auth\EmailVerificationController;
 use App\Http\Controllers\Web\Auth\NewPasswordController;
 use App\Http\Controllers\Web\Auth\PasswordResetLinkController;
 use App\Http\Controllers\Web\Auth\RegisteredUserController;
+use App\Http\Controllers\Web\Dashboard\ProfileController as DashboardProfileController;
 use App\Http\Controllers\Web\EventController;
 use App\Http\Controllers\Web\My\AgendaController;
 use App\Http\Controllers\Web\My\FavoriteController;
+use App\Http\Controllers\Web\My\FollowController;
 use App\Http\Controllers\Web\My\ProfileController;
 use App\Http\Controllers\Web\OrganizationController;
 use App\Http\Controllers\Web\Promoter\EventController as PromoterEventController;
@@ -87,6 +89,9 @@ Route::middleware('auth')->prefix('my')->name('my.')->group(function (): void {
     Route::get('profile', [ProfileController::class, 'edit'])->name('profile');
     Route::put('profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::put('profile/password', [ProfileController::class, 'updatePassword'])->name('profile.password');
+
+    Route::post('follow/promoter/{promoter:slug}', [FollowController::class, 'promoter'])->name('follow.promoter');
+    Route::post('follow/organization/{organization:slug}', [FollowController::class, 'organization'])->name('follow.organization');
 });
 
 // ---- Promoter / organization dashboard (create & manage own events) ----
@@ -98,6 +103,9 @@ Route::middleware(['auth', 'role:promoter,organization,admin'])
         Route::get('events/{event}/edit', [PromoterEventController::class, 'edit'])->name('events.edit');
         Route::put('events/{event}', [PromoterEventController::class, 'update'])->name('events.update');
         Route::delete('events/{event}', [PromoterEventController::class, 'destroy'])->name('events.destroy');
+
+        Route::get('profile', [DashboardProfileController::class, 'edit'])->name('profile');
+        Route::put('profile', [DashboardProfileController::class, 'update'])->name('profile.update');
     });
 
 // ---- Stop impersonating: reachable while logged in AS the impersonated user ----

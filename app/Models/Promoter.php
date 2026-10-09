@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 
 class Promoter extends Model
 {
@@ -53,6 +54,12 @@ class Promoter extends Model
     public function events(): HasMany
     {
         return $this->hasMany(Event::class);
+    }
+
+    /** @return MorphMany<Follow, $this> */
+    public function followers(): MorphMany
+    {
+        return $this->morphMany(Follow::class, 'followable');
     }
 
     public function getRouteKeyName(): string

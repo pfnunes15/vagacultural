@@ -79,6 +79,12 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->hasMany(PromoterRequest::class);
     }
 
+    /** @return HasMany<Follow, $this> */
+    public function follows(): HasMany
+    {
+        return $this->hasMany(Follow::class);
+    }
+
     /** @return HasMany<Favorite, $this> */
     public function favorites(): HasMany
     {
