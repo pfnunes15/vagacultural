@@ -6,13 +6,29 @@ namespace App\Policies;
 
 use App\Models\Event;
 use App\Models\User;
+use App\Services\Promoters\PromoterAccess;
 
 class EventPolicy
 {
-    /** Promoters, organizations and admins may create events. */
+    public function __construct(private readonly PromoterAccess $access) {}
+
+    /**
+     * Events are always created on behalf of a promoter. Promoters create
+     * through their own profile; organizations must be associated with at
+     * least one promoter; admins may always create. An organization with no
+     * associated promoter cannot create events.
+     */
     public function create(User $user): bool
     {
-        return $user->isAdmin() || $user->isOrganization() || $user->isPromoter();
+        if ($user->isAdmin()) {
+            return true;
+        }
+
+        if (! $user->isPromoter() && ! $user->isOrganization()) {
+            return false;
+        }
+
+        return $this->access->postableBy($user)->isNotEmpty();
     }
 
     /** Owner promoter, the managing organization, or an admin may manage an event. */

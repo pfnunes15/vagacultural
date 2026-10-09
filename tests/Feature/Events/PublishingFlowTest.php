@@ -124,3 +124,27 @@ it('lets an admin approve a pending event over HTTP', function (): void {
 
     expect($event->refresh()->status)->toBe(EventStatus::Published);
 });
+
+it('lets an organization create events only when it has an associated promoter', function (): void {
+    $orgUser = makeUserWithRole(UserRole::Organization);
+    $org = Organization::factory()->create(['user_id' => $orgUser->id]);
+
+    // No promoter yet -> cannot create.
+    expect($orgUser->can('create', Event::class))->toBeFalse();
+    $this->actingAs($orgUser)->get('/painel/eventos/novo')->assertForbidden();
+
+    // Associate a promoter -> can create.
+    Promoter::factory()->create(['organization_id' => $org->id]);
+    expect($orgUser->fresh()->can('create', Event::class))->toBeTrue();
+    $this->actingAs($orgUser->fresh())->get('/painel/eventos/novo')->assertOk();
+});
+
+it('lets a promoter with a profile create but not one without', function (): void {
+    $withProfile = makeUserWithRole(UserRole::Promoter);
+    Promoter::factory()->create(['user_id' => $withProfile->id]);
+
+    $withoutProfile = makeUserWithRole(UserRole::Promoter);
+
+    expect($withProfile->can('create', Event::class))->toBeTrue()
+        ->and($withoutProfile->can('create', Event::class))->toBeFalse();
+});

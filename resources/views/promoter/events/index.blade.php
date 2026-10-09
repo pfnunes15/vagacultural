@@ -3,11 +3,20 @@
 @section('content')
     <div style="display:flex;align-items:center;gap:12px">
         <h1 style="margin-right:auto">Os meus eventos</h1>
-        <a class="btn" href="{{ route('painel.eventos.create') }}">Novo evento</a>
+        @if ($canCreate)
+            <a class="btn" href="{{ route('painel.eventos.create') }}">Novo evento</a>
+        @endif
     </div>
 
+    @if ($needsPromoter)
+        <div class="notice">A tua organização precisa de estar associada a pelo menos um promotor para criar eventos.</div>
+    @endif
+
     @if ($events->isEmpty())
-        <div class="card">Ainda não tens eventos. <a href="{{ route('painel.eventos.create') }}">Cria o primeiro</a>.</div>
+        <div class="card">
+            Ainda não tens eventos.
+            @if ($canCreate)<a href="{{ route('painel.eventos.create') }}">Cria o primeiro</a>.@endif
+        </div>
     @else
         <table style="width:100%;border-collapse:collapse;margin-top:12px">
             <thead><tr style="text-align:left;border-bottom:1px solid #e4dccb">

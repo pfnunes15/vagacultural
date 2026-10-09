@@ -28,10 +28,10 @@ class EventController extends Controller
     public function index(): View
     {
         $user = request()->user();
-        $promoterIds = $this->access->postableBy($user)->pluck('id');
+        $postable = $this->access->postableBy($user);
 
         $events = Event::query()
-            ->whereIn('promoter_id', $promoterIds)
+            ->whereIn('promoter_id', $postable->pluck('id'))
             ->with(['promoter', 'categories'])
             ->latest()
             ->paginate(20);
@@ -39,6 +39,9 @@ class EventController extends Controller
         return view('promoter.events.index', [
             'events' => $events,
             'statuses' => EventStatus::class,
+            // An organization with no associated promoter cannot create events.
+            'canCreate' => $user->can('create', Event::class),
+            'needsPromoter' => $user->isOrganization() && $postable->isEmpty(),
         ]);
     }
 
