@@ -10,7 +10,14 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Carbon;
 
+/**
+ * @property Carbon $starts_at
+ * @property Carbon|null $ends_at
+ * @property Carbon|null $door_time
+ * @property OccurrenceStatus $status
+ */
 class EventOccurrence extends Model
 {
     /** @use HasFactory<EventOccurrenceFactory> */
