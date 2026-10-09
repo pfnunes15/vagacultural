@@ -6,6 +6,7 @@ namespace Database\Factories;
 
 use App\Enums\EventStatus;
 use App\Models\Event;
+use App\Models\Promoter;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Str;
 
@@ -19,6 +20,7 @@ class EventFactory extends Factory
         $title = fake()->sentence(3);
 
         return [
+            'promoter_id' => Promoter::factory(),
             'title' => $title,
             'slug' => Str::slug($title) . '-' . fake()->unique()->numberBetween(1, 99999),
             'summary' => fake()->sentence(),

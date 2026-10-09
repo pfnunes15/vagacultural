@@ -8,6 +8,7 @@ use App\Enums\UserRole;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
@@ -40,10 +41,24 @@ class User extends Authenticatable
         return $this->hasMany(UserRoleAssignment::class);
     }
 
-    /** @return HasMany<Promoter, $this> */
-    public function promoters(): HasMany
+    /**
+     * The promoter profile owned by this account, if it is a promoter.
+     *
+     * @return HasOne<Promoter, $this>
+     */
+    public function promoterProfile(): HasOne
     {
-        return $this->hasMany(Promoter::class);
+        return $this->hasOne(Promoter::class);
+    }
+
+    /**
+     * The organization managed by this account, if it is an organization.
+     *
+     * @return HasOne<Organization, $this>
+     */
+    public function ownedOrganization(): HasOne
+    {
+        return $this->hasOne(Organization::class);
     }
 
     /** @return HasMany<Favorite, $this> */
@@ -60,11 +75,21 @@ class User extends Authenticatable
 
     public function hasRole(UserRole $role): bool
     {
-        return $this->roles()->where('role', $role->value)->exists();
+        return $this->roles->contains('role', $role);
     }
 
     public function isAdmin(): bool
     {
         return $this->hasRole(UserRole::Admin);
+    }
+
+    public function isOrganization(): bool
+    {
+        return $this->hasRole(UserRole::Organization);
+    }
+
+    public function isPromoter(): bool
+    {
+        return $this->hasRole(UserRole::Promoter);
     }
 }

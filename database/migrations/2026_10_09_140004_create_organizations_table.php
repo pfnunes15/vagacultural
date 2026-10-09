@@ -12,6 +12,7 @@ return new class extends Migration
     {
         Schema::create('organizations', function (Blueprint $table): void {
             $table->id();
+            $table->foreignId('user_id')->nullable()->comment('Owner account (role: organization) that manages this organization')->constrained()->nullOnDelete();
             $table->string('name');
             $table->string('slug')->unique();
             $table->text('description')->nullable();

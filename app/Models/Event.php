@@ -20,7 +20,7 @@ class Event extends Model
     use HasFactory, SoftDeletes;
 
     protected $fillable = [
-        'promoter_id', 'organization_id', 'submitted_by',
+        'promoter_id', 'submitted_by',
         'title', 'title_en', 'slug', 'summary', 'summary_en',
         'description', 'description_en', 'status', 'is_featured',
         'cover_image_path', 'is_free', 'price_from', 'ticket_url',
@@ -44,10 +44,13 @@ class Event extends Model
         return $this->belongsTo(Promoter::class);
     }
 
-    /** @return BelongsTo<Organization, $this> */
-    public function organization(): BelongsTo
+    /**
+     * The organization behind this event, reached through its promoter.
+     * (Events are never linked to an organization directly.)
+     */
+    public function organization(): ?Organization
     {
-        return $this->belongsTo(Organization::class);
+        return $this->promoter?->organization;
     }
 
     /** @return BelongsTo<User, $this> */

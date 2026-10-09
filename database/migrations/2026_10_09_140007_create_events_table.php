@@ -12,8 +12,7 @@ return new class extends Migration
     {
         Schema::create('events', function (Blueprint $table): void {
             $table->id();
-            $table->foreignId('promoter_id')->nullable()->constrained('promoters')->nullOnDelete();
-            $table->foreignId('organization_id')->nullable()->constrained('organizations')->nullOnDelete();
+            $table->foreignId('promoter_id')->comment('Every event is owned by a promoter; the organization is reached via the promoter')->constrained('promoters')->cascadeOnDelete();
             $table->foreignId('submitted_by')->nullable()->constrained('users')->nullOnDelete();
 
             $table->string('title');
