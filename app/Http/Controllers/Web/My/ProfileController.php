@@ -34,6 +34,7 @@ class ProfileController extends Controller
     {
         $user = $request->user();
         $data = $request->safe()->only(['first_name', 'last_name', 'nationality', 'locale']);
+        $data['marketing_emails'] = $request->boolean('marketing_emails');
 
         $emailChanged = $request->input('email') !== $user->email;
         $user->fill($data);

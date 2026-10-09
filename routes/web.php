@@ -27,9 +27,12 @@ use App\Http\Controllers\Web\OrganizationController;
 use App\Http\Controllers\Web\Promoter\EventController as PromoterEventController;
 use App\Http\Controllers\Web\PromoterController;
 use App\Http\Controllers\Web\PromoterRequestController;
+use App\Http\Controllers\Web\UnsubscribeController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', fn () => redirect()->route('events.index'))->name('home');
+
+Route::get('/unsubscribe/{user}', UnsubscribeController::class)->middleware('signed')->name('unsubscribe');
 
 // ---- Public events area (no login required) ----
 Route::get('/events', [EventController::class, 'index'])->name('events.index');

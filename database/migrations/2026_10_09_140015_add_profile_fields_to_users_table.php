@@ -16,13 +16,14 @@ return new class extends Migration
             $table->string('locale', 5)->default('pt')->after('avatar_path');
             $table->string('nationality', 2)->nullable()->comment('ISO 3166-1 alpha-2')->after('locale');
             $table->text('bio')->nullable()->after('locale');
+            $table->boolean('marketing_emails')->default(true)->after('bio')->comment('Opt-in to weekly digest / nudges');
         });
     }
 
     public function down(): void
     {
         Schema::table('users', function (Blueprint $table): void {
-            $table->dropColumn(['phone', 'avatar_path', 'locale', 'nationality', 'bio']);
+            $table->dropColumn(['phone', 'avatar_path', 'locale', 'nationality', 'bio', 'marketing_emails']);
         });
     }
 };

@@ -29,6 +29,10 @@
             @endforeach
         </select>
 
+        <label style="font-weight:400;display:flex;gap:8px;align-items:center;margin-top:12px">
+            <input type="checkbox" name="marketing_emails" value="1" style="width:auto" @checked(old('marketing_emails', $user->marketing_emails))> Quero receber o resumo semanal e novidades
+        </label>
+
         <label>Categorias favoritas</label>
         <div style="display:flex;flex-wrap:wrap;gap:10px">
             @foreach ($categories as $cat)

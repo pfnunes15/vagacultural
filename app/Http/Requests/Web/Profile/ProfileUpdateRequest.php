@@ -25,6 +25,7 @@ class ProfileUpdateRequest extends FormRequest
             'email' => ['required', 'email', 'max:255', Rule::unique('users', 'email')->ignore($this->user()->id)],
             'nationality' => ['nullable', 'string', 'size:2'],
             'locale' => ['nullable', Rule::in(array_keys(config('locales.supported')))],
+            'marketing_emails' => ['sometimes', 'boolean'],
             'categories' => ['array'],
             'categories.*' => ['integer', 'exists:categories,id'],
         ];
