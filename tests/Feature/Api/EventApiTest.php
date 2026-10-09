@@ -16,41 +16,48 @@ function publishedEventWithOccurrence(array $attrs = []): Event
     return $event;
 }
 
-it('lists upcoming published events publicly (no token)', function (): void {
-    publishedEventWithOccurrence(['title' => 'Público Visível']);
+function apiToken(): string
+{
+    return User::factory()->create()->createToken('app')->plainTextToken;
+}
+
+it('requires a token for every data endpoint', function (): void {
+    $event = publishedEventWithOccurrence();
+
+    $this->getJson('/api/v1/events')->assertUnauthorized();
+    $this->getJson('/api/v1/events/calendar')->assertUnauthorized();
+    $this->getJson("/api/v1/events/{$event->slug}")->assertUnauthorized();
+});
+
+it('lists upcoming published events with a token', function (): void {
+    publishedEventWithOccurrence(['title' => 'Visível']);
     Event::factory()->create(['title' => 'Rascunho Escondido']); // draft, no occurrence
 
-    $this->getJson('/api/v1/events')
+    $this->withToken(apiToken())->getJson('/api/v1/events')
         ->assertOk()
         ->assertJsonStructure(['data' => [['id', 'slug', 'title', 'tickets', 'min_age']], 'meta', 'links'])
-        ->assertJsonFragment(['title' => 'Público Visível'])
+        ->assertJsonFragment(['title' => 'Visível'])
         ->assertJsonMissing(['title' => 'Rascunho Escondido']);
 });
 
-it('filters the list by category', function (): void {
+it('filters the list by category with a token', function (): void {
     $cat = Category::factory()->create(['slug' => 'concertos-x']);
     $concert = publishedEventWithOccurrence(['title' => 'Com Categoria']);
     $concert->categories()->attach($cat, ['is_primary' => true]);
     publishedEventWithOccurrence(['title' => 'Sem Categoria']);
 
-    $this->getJson('/api/v1/events?categoria=concertos-x')
+    $this->withToken(apiToken())->getJson('/api/v1/events?categoria=concertos-x')
         ->assertOk()
         ->assertJsonFragment(['title' => 'Com Categoria'])
         ->assertJsonMissing(['title' => 'Sem Categoria']);
 });
 
-it('returns the calendar grouped by day publicly', function (): void {
+it('returns the calendar grouped by day with a token', function (): void {
     publishedEventWithOccurrence(['title' => 'No Calendário']);
 
-    $this->getJson('/api/v1/events/calendar')
+    $this->withToken(apiToken())->getJson('/api/v1/events/calendar')
         ->assertOk()
         ->assertJsonStructure(['data' => [['date', 'occurrences']]]);
-});
-
-it('requires a token for the event detail (the gate)', function (): void {
-    $event = publishedEventWithOccurrence();
-
-    $this->getJson("/api/v1/events/{$event->slug}")->assertUnauthorized();
 });
 
 it('returns full event detail with a token', function (): void {
@@ -60,9 +67,7 @@ it('returns full event detail with a token', function (): void {
     $event->tags()->create(['name' => 'jazz', 'slug' => 'jazz-x']);
     $event->ticketTiers()->create(['name' => 'Adulto', 'price' => 10, 'min_age' => 18, 'position' => 0]);
 
-    $token = User::factory()->create()->createToken('app')->plainTextToken;
-
-    $this->withToken($token)->getJson("/api/v1/events/{$event->slug}")
+    $this->withToken(apiToken())->getJson("/api/v1/events/{$event->slug}")
         ->assertOk()
         ->assertJsonPath('data.title', 'Detalhe Completo')
         ->assertJsonPath('data.min_age.value', 12)
@@ -76,7 +81,6 @@ it('returns full event detail with a token', function (): void {
 
 it('404s on a non-published event detail even with a token', function (): void {
     $event = Event::factory()->create(['status' => EventStatus::Pending]);
-    $token = User::factory()->create()->createToken('app')->plainTextToken;
 
-    $this->withToken($token)->getJson("/api/v1/events/{$event->slug}")->assertNotFound();
+    $this->withToken(apiToken())->getJson("/api/v1/events/{$event->slug}")->assertNotFound();
 });
