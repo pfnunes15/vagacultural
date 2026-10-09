@@ -75,7 +75,9 @@ class User extends Authenticatable
 
     public function hasRole(UserRole $role): bool
     {
-        return $this->roles->contains('role', $role);
+        return $this->roles->contains(
+            fn (UserRoleAssignment $assignment): bool => $assignment->role === $role,
+        );
     }
 
     public function isAdmin(): bool

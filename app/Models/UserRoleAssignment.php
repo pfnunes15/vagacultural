@@ -8,6 +8,9 @@ use App\Enums\UserRole;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+/**
+ * @property UserRole $role
+ */
 class UserRoleAssignment extends Model
 {
     protected $table = 'user_roles';
