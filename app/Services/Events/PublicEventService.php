@@ -8,6 +8,7 @@ use App\Models\Event;
 use App\Models\EventOccurrence;
 use App\Models\Organization;
 use App\Models\Promoter;
+use App\Models\Tag;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
@@ -68,6 +69,18 @@ class PublicEventService
             ))
             ->paginate($perPage)
             ->withQueryString();
+    }
+
+    /**
+     * Upcoming published events carrying a given tag.
+     *
+     * @return LengthAwarePaginator<int, Event>
+     */
+    public function forTag(Tag $tag, int $perPage = 12): LengthAwarePaginator
+    {
+        return $this->baseUpcoming()
+            ->whereHas('tags', fn ($q) => $q->whereKey($tag->id))
+            ->paginate($perPage);
     }
 
     /**

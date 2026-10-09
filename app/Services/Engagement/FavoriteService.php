@@ -6,6 +6,7 @@ namespace App\Services\Engagement;
 
 use App\Models\Category;
 use App\Models\Favorite;
+use App\Models\Tag;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Model;
 
@@ -50,6 +51,22 @@ class FavoriteService
         $user->favorites()->where('favoritable_type', $type)->delete();
 
         foreach (array_unique($categoryIds) as $id) {
+            $user->favorites()->create(['favoritable_type' => $type, 'favoritable_id' => $id]);
+        }
+    }
+
+    /**
+     * Replace the user's favorite tags with the given set.
+     *
+     * @param  list<int>  $tagIds
+     */
+    public function syncTags(User $user, array $tagIds): void
+    {
+        $type = (new Tag)->getMorphClass();
+
+        $user->favorites()->where('favoritable_type', $type)->delete();
+
+        foreach (array_unique($tagIds) as $id) {
             $user->favorites()->create(['favoritable_type' => $type, 'favoritable_id' => $id]);
         }
     }

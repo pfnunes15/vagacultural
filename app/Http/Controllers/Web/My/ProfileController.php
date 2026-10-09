@@ -8,6 +8,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Web\Profile\PasswordUpdateRequest;
 use App\Http\Requests\Web\Profile\ProfileUpdateRequest;
 use App\Models\Category;
+use App\Models\Tag;
 use App\Services\Engagement\FavoriteService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -26,6 +27,10 @@ class ProfileController extends Controller
             'categories' => Category::query()->where('is_active', true)->orderBy('name')->get(),
             'favoriteCategoryIds' => $user->favorites()
                 ->where('favoritable_type', (new Category)->getMorphClass())
+                ->pluck('favoritable_id')->all(),
+            'tags' => Tag::query()->withCount('events')->orderByDesc('events_count')->orderBy('name')->limit(30)->get(),
+            'favoriteTagIds' => $user->favorites()
+                ->where('favoritable_type', (new Tag)->getMorphClass())
                 ->pluck('favoritable_id')->all(),
         ]);
     }
@@ -47,6 +52,7 @@ class ProfileController extends Controller
         $user->save();
 
         $this->favorites->syncCategories($user, array_map('intval', $request->input('categories', [])));
+        $this->favorites->syncTags($user, array_map('intval', $request->input('tags', [])));
 
         if ($emailChanged) {
             $user->sendEmailVerificationNotification();

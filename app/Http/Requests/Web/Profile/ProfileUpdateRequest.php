@@ -28,6 +28,8 @@ class ProfileUpdateRequest extends FormRequest
             'marketing_emails' => ['sometimes', 'boolean'],
             'categories' => ['array'],
             'categories.*' => ['integer', 'exists:categories,id'],
+            'tags' => ['array'],
+            'tags.*' => ['integer', 'exists:tags,id'],
         ];
     }
 }

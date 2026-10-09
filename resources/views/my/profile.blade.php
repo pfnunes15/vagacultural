@@ -43,6 +43,17 @@
             @endforeach
         </div>
 
+        @if ($tags->isNotEmpty())
+            <label>Tags favoritas</label>
+            <div style="display:flex;flex-wrap:wrap;gap:8px">
+                @foreach ($tags as $tag)
+                    <label style="font-weight:400;display:flex;gap:4px;align-items:center" class="tag">
+                        <input type="checkbox" name="tags[]" value="{{ $tag->id }}" style="width:auto" @checked(in_array($tag->id, old('tags', $favoriteTagIds)))> #{{ $tag->name }}
+                    </label>
+                @endforeach
+            </div>
+        @endif
+
         <p style="margin-top:16px"><button type="submit">Guardar perfil</button></p>
     </form>
 

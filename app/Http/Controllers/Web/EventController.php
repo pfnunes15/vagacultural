@@ -7,6 +7,7 @@ namespace App\Http\Controllers\Web;
 use App\Http\Controllers\Controller;
 use App\Models\Category;
 use App\Models\Event;
+use App\Models\Tag;
 use App\Services\Analytics\ActivityLogger;
 use App\Services\Events\PublicEventService;
 use Illuminate\Http\Request;
@@ -44,6 +45,16 @@ class EventController extends Controller
             'category' => $category->slug,
             'search' => null,
             'heading' => $category->name,
+        ]);
+    }
+
+    public function tag(Tag $tag): View
+    {
+        return view('events.index', [
+            'events' => $this->events->forTag($tag),
+            'category' => null,
+            'search' => null,
+            'heading' => '#' . $tag->name,
         ]);
     }
 

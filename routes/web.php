@@ -27,6 +27,7 @@ use App\Http\Controllers\Web\OrganizationController;
 use App\Http\Controllers\Web\Promoter\EventController as PromoterEventController;
 use App\Http\Controllers\Web\PromoterController;
 use App\Http\Controllers\Web\PromoterRequestController;
+use App\Http\Controllers\Web\TagController;
 use App\Http\Controllers\Web\UnsubscribeController;
 use Illuminate\Support\Facades\Route;
 
@@ -38,6 +39,8 @@ Route::get('/unsubscribe/{user}', UnsubscribeController::class)->middleware('sig
 Route::get('/events', [EventController::class, 'index'])->name('events.index');
 Route::get('/calendar', [EventController::class, 'calendar'])->name('events.calendar');
 Route::get('/category/{category:slug}', [EventController::class, 'category'])->name('events.category');
+Route::get('/tag/{tag:slug}', [EventController::class, 'tag'])->name('events.tag');
+Route::get('/tags/suggest', [TagController::class, 'suggest'])->name('tags.suggest');
 
 // ---- Public directory: promoters & organizations ----
 Route::get('/promoters', [PromoterController::class, 'index'])->name('promoters.index');
