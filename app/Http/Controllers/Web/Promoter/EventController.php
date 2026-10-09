@@ -8,6 +8,7 @@ use App\Enums\AgeRating;
 use App\Enums\EventStatus;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Web\Event\StoreEventRequest;
+use App\Http\Requests\Web\Event\UpdateEventRequest;
 use App\Models\Category;
 use App\Models\Event;
 use App\Models\Promoter;
@@ -89,5 +90,48 @@ class EventController extends Controller
             : 'Evento submetido. Ficará visível após aprovação de um administrador.';
 
         return redirect()->route('painel.eventos.index')->with('status', $message);
+    }
+
+    public function edit(Event $event): View
+    {
+        $this->authorize('update', $event);
+
+        return view('promoter.events.edit', [
+            'event' => $event->load(['categories', 'tags', 'ticketTiers', 'occurrences']),
+            'categories' => Category::query()->where('is_active', true)->orderBy('name')->get(),
+            'venues' => Venue::query()->where('is_active', true)->orderBy('name')->get(),
+            'ageRatings' => AgeRating::cases(),
+        ]);
+    }
+
+    public function update(UpdateEventRequest $request, Event $event): RedirectResponse
+    {
+        $this->authorize('update', $event);
+
+        $attributes = $request->eventAttributes();
+
+        if ($request->hasFile('cover_image')) {
+            $attributes['cover_image_path'] = $request->file('cover_image')->store('covers', 'public');
+        }
+
+        $this->workflow->update(
+            $event,
+            $attributes,
+            $request->categoryIds(),
+            $request->occurrences(),
+            $request->tagNames(),
+            $request->ticketTiers(),
+        );
+
+        return redirect()->route('painel.eventos.index')->with('status', 'Evento atualizado.');
+    }
+
+    public function destroy(Event $event): RedirectResponse
+    {
+        $this->authorize('delete', $event);
+
+        $event->delete();
+
+        return redirect()->route('painel.eventos.index')->with('status', 'Evento removido.');
     }
 }

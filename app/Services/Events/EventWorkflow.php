@@ -109,6 +109,53 @@ class EventWorkflow
         return array_values($ids);
     }
 
+    /**
+     * Update an existing event's fields and relations. Status is preserved
+     * (editing does not re-trigger the publish/pending decision).
+     *
+     * @param  array<string, mixed>  $attributes
+     * @param  list<int>  $categoryIds
+     * @param  list<array<string, mixed>>  $occurrences
+     * @param  list<string>  $tagNames
+     * @param  list<array<string, mixed>>  $ticketTiers
+     */
+    public function update(
+        Event $event,
+        array $attributes,
+        array $categoryIds,
+        array $occurrences,
+        array $tagNames = [],
+        array $ticketTiers = [],
+    ): Event {
+        return DB::transaction(function () use ($event, $attributes, $categoryIds, $occurrences, $tagNames, $ticketTiers): Event {
+            $event->update($attributes);
+
+            if ($categoryIds !== []) {
+                $primary = $categoryIds[0];
+                $event->categories()->sync(
+                    collect($categoryIds)->mapWithKeys(
+                        fn (int $id): array => [$id => ['is_primary' => $id === $primary]],
+                    )->all(),
+                );
+            }
+
+            $event->tags()->sync($this->resolveTagIds($tagNames));
+
+            // Occurrences and tiers are replaced wholesale.
+            $event->occurrences()->delete();
+            foreach ($occurrences as $occurrence) {
+                $event->occurrences()->create($occurrence);
+            }
+
+            $event->ticketTiers()->delete();
+            foreach ($ticketTiers as $i => $tier) {
+                $event->ticketTiers()->create([...$tier, 'position' => $i]);
+            }
+
+            return $event->refresh();
+        });
+    }
+
     /** Admin approves a pending event. */
     public function approve(Event $event): Event
     {

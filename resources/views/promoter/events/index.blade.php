@@ -20,7 +20,7 @@
     @else
         <table style="width:100%;border-collapse:collapse;margin-top:12px">
             <thead><tr style="text-align:left;border-bottom:1px solid #e4dccb">
-                <th style="padding:8px 6px">Evento</th><th>Promotor</th><th>Estado</th>
+                <th style="padding:8px 6px">Evento</th><th>Promotor</th><th>Estado</th><th></th>
             </tr></thead>
             <tbody>
             @foreach ($events as $event)
@@ -28,6 +28,7 @@
                     <td style="padding:8px 6px">{{ $event->title }}</td>
                     <td class="muted">{{ $event->promoter->name }}</td>
                     <td><span class="tag">{{ $event->status->label() }}</span></td>
+                    <td><a href="{{ route('painel.eventos.edit', $event) }}">Editar</a></td>
                 </tr>
             @endforeach
             </tbody>

@@ -61,6 +61,9 @@ Route::middleware(['auth', 'role:promoter,organization,admin'])
         Route::get('eventos', [PromoterEventController::class, 'index'])->name('eventos.index');
         Route::get('eventos/novo', [PromoterEventController::class, 'create'])->name('eventos.create');
         Route::post('eventos', [PromoterEventController::class, 'store'])->name('eventos.store');
+        Route::get('eventos/{event}/editar', [PromoterEventController::class, 'edit'])->name('eventos.edit');
+        Route::put('eventos/{event}', [PromoterEventController::class, 'update'])->name('eventos.update');
+        Route::delete('eventos/{event}', [PromoterEventController::class, 'destroy'])->name('eventos.destroy');
     });
 
 // ---- Stop impersonating: reachable while logged in AS the impersonated user ----
