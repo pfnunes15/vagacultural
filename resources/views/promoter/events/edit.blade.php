@@ -5,6 +5,21 @@
         <h1 style="margin-right:auto">Editar evento</h1>
         <span class="tag">{{ $event->status->label() }}</span>
     </div>
+    @if ($event->occurrences->isNotEmpty())
+        <div class="card" style="margin-bottom:16px">
+            <strong>Bilhetes por sessão</strong>
+            <ul>
+                @foreach ($event->occurrences as $occ)
+                    <li>
+                        {{ $occ->starts_at->translatedFormat('d \d\e F · H:i') }} —
+                        <a href="{{ route('dashboard.occurrences.tickets', $occ) }}">gerir bilhetes</a> ·
+                        <a href="{{ route('dashboard.occurrences.checkin', $occ) }}">check-in</a>
+                    </li>
+                @endforeach
+            </ul>
+        </div>
+    @endif
+
     <form method="POST" action="{{ route('dashboard.events.update', $event) }}" enctype="multipart/form-data" style="max-width:720px">
         @csrf
         @method('PUT')

@@ -53,6 +53,7 @@
                 <a href="{{ route('my.recommendations') }}">Para ti</a>
                 <a href="{{ route('my.favorites') }}">Favoritos</a>
                 <a href="{{ route('my.agenda') }}">Agenda</a>
+                <a href="{{ route('my.tickets') }}">Bilhetes</a>
                 <a href="{{ route('my.profile') }}">Perfil</a>
                 @if ($u->isAdmin())
                     <a href="{{ route('admin.dashboard') }}">Admin</a>

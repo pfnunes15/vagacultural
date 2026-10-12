@@ -35,6 +35,28 @@
                     — {{ $occ->locationLabel() }}
                     @if ($occ->is_online && $occ->online_url) (<a href="{{ $occ->online_url }}" target="_blank" rel="noopener">link</a>)@endif
                     @if ($occ->status->value !== 'scheduled') <span class="tag">{{ $occ->status->label() }}</span>@endif
+
+                    @if ($occ->ticketTypes->isNotEmpty())
+                        @auth
+                            <form method="POST" action="{{ route('my.occurrences.register', $occ) }}" style="margin:8px 0 4px;padding:10px;border:1px solid #e4dccb;border-radius:8px">
+                                @csrf
+                                @foreach ($occ->ticketTypes->where('is_active', true) as $type)
+                                    <div style="display:flex;gap:8px;align-items:center;margin:4px 0">
+                                        <label style="font-weight:400;flex:1">
+                                            {{ $type->name }} —
+                                            {{ $type->isFree() ? 'grátis' : '€' . number_format((float) $type->price, 2, ',', ' ') }}
+                                            <span class="muted mono">({{ $type->remaining() }} disp.)</span>
+                                        </label>
+                                        <input type="number" name="quantities[{{ $type->id }}]" min="0" max="{{ min(10, $type->remaining()) }}" value="0" style="width:64px" @disabled($type->remaining() < 1)>
+                                    </div>
+                                @endforeach
+                                <button class="btn" style="margin-top:6px">Inscrever-me</button>
+                            </form>
+                            @error('tickets')<div class="err">{{ $message }}</div>@enderror
+                        @else
+                            <div class="muted">Entra para te inscreveres nesta sessão.</div>
+                        @endauth
+                    @endif
                 </li>
             @empty
                 <li class="muted">Sem sessões agendadas.</li>

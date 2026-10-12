@@ -16,13 +16,16 @@ use App\Http\Controllers\Web\Auth\EmailVerificationController;
 use App\Http\Controllers\Web\Auth\NewPasswordController;
 use App\Http\Controllers\Web\Auth\PasswordResetLinkController;
 use App\Http\Controllers\Web\Auth\RegisteredUserController;
+use App\Http\Controllers\Web\Dashboard\CheckInController;
 use App\Http\Controllers\Web\Dashboard\ProfileController as DashboardProfileController;
+use App\Http\Controllers\Web\Dashboard\TicketTypeController;
 use App\Http\Controllers\Web\EventController;
 use App\Http\Controllers\Web\My\AgendaController;
 use App\Http\Controllers\Web\My\FavoriteController;
 use App\Http\Controllers\Web\My\FollowController;
 use App\Http\Controllers\Web\My\ProfileController;
 use App\Http\Controllers\Web\My\RecommendationController;
+use App\Http\Controllers\Web\My\TicketController as MyTicketController;
 use App\Http\Controllers\Web\OrganizationController;
 use App\Http\Controllers\Web\Promoter\EventController as PromoterEventController;
 use App\Http\Controllers\Web\PromoterController;
@@ -101,6 +104,9 @@ Route::middleware('auth')->prefix('my')->name('my.')->group(function (): void {
     Route::post('follow/organization/{organization:slug}', [FollowController::class, 'organization'])->name('follow.organization');
 
     Route::get('recommendations', [RecommendationController::class, 'index'])->name('recommendations');
+
+    Route::get('tickets', [MyTicketController::class, 'index'])->name('tickets');
+    Route::post('occurrences/{occurrence}/register', [MyTicketController::class, 'store'])->name('occurrences.register');
 });
 
 // ---- Promoter / organization dashboard (create & manage own events) ----
@@ -115,6 +121,14 @@ Route::middleware(['auth', 'role:promoter,organization,admin'])
 
         Route::get('profile', [DashboardProfileController::class, 'edit'])->name('profile');
         Route::put('profile', [DashboardProfileController::class, 'update'])->name('profile.update');
+
+        // Ticketing (per occurrence)
+        Route::get('occurrences/{occurrence}/tickets', [TicketTypeController::class, 'index'])->name('occurrences.tickets');
+        Route::post('occurrences/{occurrence}/tickets', [TicketTypeController::class, 'store'])->name('occurrences.tickets.store');
+        Route::put('occurrences/{occurrence}/tickets/{ticketType}', [TicketTypeController::class, 'update'])->name('occurrences.tickets.update');
+        Route::delete('occurrences/{occurrence}/tickets/{ticketType}', [TicketTypeController::class, 'destroy'])->name('occurrences.tickets.destroy');
+        Route::get('occurrences/{occurrence}/check-in', [CheckInController::class, 'show'])->name('occurrences.checkin');
+        Route::post('occurrences/{occurrence}/check-in', [CheckInController::class, 'scan'])->name('occurrences.checkin.scan');
     });
 
 // ---- Stop impersonating: reachable while logged in AS the impersonated user ----

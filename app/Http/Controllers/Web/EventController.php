@@ -82,7 +82,7 @@ class EventController extends Controller
             'ticketTiers',
             'promoter.organization',
             'images',
-            'occurrences' => fn ($q) => $q->orderBy('starts_at')->with('venue'),
+            'occurrences' => fn ($q) => $q->orderBy('starts_at')->with(['venue', 'ticketTypes']),
         ]);
 
         return view('events.show', ['event' => $event]);
