@@ -26,6 +26,7 @@ use App\Http\Controllers\Web\My\FollowController;
 use App\Http\Controllers\Web\My\ProfileController;
 use App\Http\Controllers\Web\My\RecommendationController;
 use App\Http\Controllers\Web\My\TicketController as MyTicketController;
+use App\Http\Controllers\Web\My\TicketQrController;
 use App\Http\Controllers\Web\OrganizationController;
 use App\Http\Controllers\Web\Promoter\EventController as PromoterEventController;
 use App\Http\Controllers\Web\PromoterController;
@@ -107,6 +108,7 @@ Route::middleware('auth')->prefix('my')->name('my.')->group(function (): void {
 
     Route::get('tickets', [MyTicketController::class, 'index'])->name('tickets');
     Route::post('occurrences/{occurrence}/register', [MyTicketController::class, 'store'])->name('occurrences.register');
+    Route::get('tickets/{ticket:code}/qr', TicketQrController::class)->name('tickets.qr');
 });
 
 // ---- Promoter / organization dashboard (create & manage own events) ----

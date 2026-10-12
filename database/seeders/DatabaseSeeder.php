@@ -10,6 +10,7 @@ use App\Models\Event;
 use App\Models\EventOccurrence;
 use App\Models\Organization;
 use App\Models\Promoter;
+use App\Models\TicketType;
 use App\Models\User;
 use App\Models\UserRoleAssignment;
 use App\Models\Venue;
@@ -73,11 +74,15 @@ class DatabaseSeeder extends Seeder
         if ($concertos) {
             $event->categories()->attach($concertos, ['is_primary' => true]);
         }
-        EventOccurrence::factory()->create([
+        $occurrence = EventOccurrence::factory()->create([
             'event_id' => $event->id,
             'venue_id' => $venue->id,
             'starts_at' => now()->addDays(2)->setTime(21, 0),
         ]);
+
+        // Phase-1 ticketing: a free tier and a paid tier (price informational until payments exist).
+        TicketType::create(['event_occurrence_id' => $occurrence->id, 'name' => 'Entrada livre', 'price' => 0, 'capacity' => 100, 'position' => 0]);
+        TicketType::create(['event_occurrence_id' => $occurrence->id, 'name' => 'Plateia', 'price' => 12, 'capacity' => 50, 'position' => 1]);
     }
 
     private function makeUser(string $name, string $email, UserRole $role): User

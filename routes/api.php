@@ -9,6 +9,7 @@ use App\Http\Controllers\Api\V1\EventController;
 use App\Http\Controllers\Api\V1\HomeFeedController;
 use App\Http\Controllers\Api\V1\ProfileController;
 use App\Http\Controllers\Api\V1\RecommendationController;
+use App\Http\Controllers\Api\V1\TicketController;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('v1')->group(function (): void {
@@ -30,6 +31,12 @@ Route::prefix('v1')->group(function (): void {
         // Device registration for push notifications
         Route::post('me/devices', [DeviceController::class, 'store'])->name('api.me.devices.store');
         Route::delete('me/devices/{token}', [DeviceController::class, 'destroy'])->name('api.me.devices.destroy');
+
+        // Ticketing (Phase 1)
+        Route::get('occurrences/{occurrence}/ticket-types', [TicketController::class, 'types'])->name('api.occurrences.ticket-types');
+        Route::post('occurrences/{occurrence}/register', [TicketController::class, 'register'])->name('api.occurrences.register');
+        Route::get('me/tickets', [TicketController::class, 'mine'])->name('api.me.tickets');
+        Route::post('tickets/{code}/check-in', [TicketController::class, 'checkIn'])->name('api.tickets.checkin');
 
         // Events: list, calendar and detail all require authentication.
         Route::get('events', [EventController::class, 'index'])->name('api.events.index');
