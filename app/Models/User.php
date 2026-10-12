@@ -80,6 +80,12 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->hasMany(PromoterRequest::class);
     }
 
+    /** @return HasMany<DeviceToken, $this> */
+    public function deviceTokens(): HasMany
+    {
+        return $this->hasMany(DeviceToken::class);
+    }
+
     /** @return HasMany<Follow, $this> */
     public function follows(): HasMany
     {

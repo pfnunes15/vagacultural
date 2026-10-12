@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Services\Events;
 
+use App\Actions\Events\NotifyFollowersOfPublishedEvent;
 use App\Enums\EventStatus;
 use App\Models\Event;
 use App\Models\Promoter;
@@ -21,6 +22,8 @@ use Illuminate\Support\Str;
  */
 class EventWorkflow
 {
+    public function __construct(private readonly NotifyFollowersOfPublishedEvent $notifyFollowers) {}
+
     /**
      * Status a new submission lands in, based on the promoter's trust level.
      * Trusted promoters (admin-set `auto_publish`) publish immediately;
@@ -49,12 +52,12 @@ class EventWorkflow
         array $tagNames = [],
         array $ticketTiers = [],
     ): Event {
-        return DB::transaction(function () use ($promoter, $attributes, $categoryIds, $occurrences, $submitter, $tagNames, $ticketTiers): Event {
+        $event = DB::transaction(function () use ($promoter, $attributes, $categoryIds, $occurrences, $submitter, $tagNames, $ticketTiers): Event {
             $status = $this->initialStatusFor($promoter);
 
             $event = $promoter->events()->create([
                 ...$attributes,
-                'slug' => $this->uniqueSlug($attributes['title']),
+                'slug' => $this->uniqueSlug($this->titleString($attributes['title'])),
                 'status' => $status,
                 'submitted_by' => $submitter->id,
                 'published_at' => $status === EventStatus::Published ? now() : null,
@@ -81,6 +84,12 @@ class EventWorkflow
 
             return $event;
         });
+
+        if ($event->status === EventStatus::Published) {
+            $this->notifyFollowers->handle($event);
+        }
+
+        return $event;
     }
 
     /**
@@ -164,6 +173,8 @@ class EventWorkflow
             'published_at' => $event->published_at ?? now(),
         ]);
 
+        $this->notifyFollowers->handle($event);
+
         return $event;
     }
 
@@ -173,6 +184,21 @@ class EventWorkflow
         $event->update(['status' => EventStatus::Rejected]);
 
         return $event;
+    }
+
+    /**
+     * Title may arrive as a plain string or a translations array; use the
+     * default-locale value (or the first available) to build the slug.
+     *
+     * @param  string|array<string, string>  $title
+     */
+    private function titleString(string|array $title): string
+    {
+        if (is_string($title)) {
+            return $title;
+        }
+
+        return $title[config('locales.default')] ?? (string) (reset($title) ?: 'event');
     }
 
     private function uniqueSlug(string $title): string
