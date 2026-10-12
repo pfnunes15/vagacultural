@@ -19,6 +19,7 @@ class Promoter extends Model
     protected $fillable = [
         'user_id', 'organization_id', 'name', 'slug', 'description', 'website',
         'email', 'phone', 'logo_path', 'is_verified', 'auto_publish', 'is_active',
+        'commission_rate', 'stripe_account_id', 'stripe_onboarded',
     ];
 
     protected function casts(): array
@@ -27,6 +28,8 @@ class Promoter extends Model
             'is_verified' => 'boolean',
             'auto_publish' => 'boolean',
             'is_active' => 'boolean',
+            'stripe_onboarded' => 'boolean',
+            'commission_rate' => 'decimal:2',
         ];
     }
 

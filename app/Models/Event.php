@@ -21,6 +21,7 @@ use Spatie\Translatable\HasTranslations;
 /**
  * @property EventStatus $status
  * @property AgeRating|null $min_age
+ * @property string|null $commission_rate
  * @property Carbon|null $published_at
  * @property int|null $recommendation_score transient, set by RecommendationService
  * @property string|null $recommendation_reason transient, set by RecommendationService
@@ -37,7 +38,7 @@ class Event extends Model
         'promoter_id', 'submitted_by',
         'title', 'slug', 'summary', 'description', 'status', 'is_featured',
         'cover_image_path', 'is_free', 'price_from', 'ticket_url',
-        'website', 'min_age', 'published_at',
+        'website', 'min_age', 'commission_rate', 'published_at',
     ];
 
     protected function casts(): array

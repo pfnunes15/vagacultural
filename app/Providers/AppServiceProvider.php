@@ -4,10 +4,12 @@ declare(strict_types=1);
 
 namespace App\Providers;
 
+use App\Contracts\PaymentGateway;
 use App\Contracts\PushSender;
 use App\Models\EventOccurrence;
 use App\Models\Ticket;
 use App\Policies\TicketTypePolicy;
+use App\Services\Payments\Drivers\FakePaymentGateway;
 use App\Services\Push\Drivers\FcmPushSender;
 use App\Services\Push\Drivers\LogPushSender;
 use Illuminate\Support\Facades\Gate;
@@ -24,6 +26,12 @@ class AppServiceProvider extends ServiceProvider
             return match (config('push.driver')) {
                 'fcm' => new FcmPushSender,
                 default => new LogPushSender,
+            };
+        });
+
+        $this->app->bind(PaymentGateway::class, function ($app) {
+            return match (config('ticketing.gateway', 'fake')) {
+                default => new FakePaymentGateway,
             };
         });
     }
