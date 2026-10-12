@@ -13,3 +13,5 @@ use Illuminate\Support\Facades\Schedule;
 
 Schedule::command('mail:weekly-digest')->weeklyOn(4, '09:00'); // Thursdays 09:00
 Schedule::command('mail:promoter-nudge')->monthlyOn(1, '10:00');
+
+Schedule::command('tickets:expire-holds')->everyFiveMinutes();

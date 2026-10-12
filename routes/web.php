@@ -21,6 +21,7 @@ use App\Http\Controllers\Web\Dashboard\ProfileController as DashboardProfileCont
 use App\Http\Controllers\Web\Dashboard\TicketTypeController;
 use App\Http\Controllers\Web\EventController;
 use App\Http\Controllers\Web\My\AgendaController;
+use App\Http\Controllers\Web\My\CheckoutController as MyCheckoutController;
 use App\Http\Controllers\Web\My\FavoriteController;
 use App\Http\Controllers\Web\My\FollowController;
 use App\Http\Controllers\Web\My\ProfileController;
@@ -109,6 +110,9 @@ Route::middleware('auth')->prefix('my')->name('my.')->group(function (): void {
     Route::get('tickets', [MyTicketController::class, 'index'])->name('tickets');
     Route::post('occurrences/{occurrence}/register', [MyTicketController::class, 'store'])->name('occurrences.register');
     Route::get('tickets/{ticket:code}/qr', TicketQrController::class)->name('tickets.qr');
+    Route::get('checkout/{order}', [MyCheckoutController::class, 'show'])->name('checkout');
+    Route::post('checkout/{order}/pay', [MyCheckoutController::class, 'pay'])->name('checkout.pay');
+    Route::post('checkout/{order}/cancel', [MyCheckoutController::class, 'cancel'])->name('checkout.cancel');
 });
 
 // ---- Promoter / organization dashboard (create & manage own events) ----
