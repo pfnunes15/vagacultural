@@ -98,6 +98,12 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->hasMany(Favorite::class);
     }
 
+    /** @return HasMany<TicketOrder, $this> */
+    public function ticketOrders(): HasMany
+    {
+        return $this->hasMany(TicketOrder::class);
+    }
+
     /** @return HasMany<AgendaItem, $this> */
     public function agendaItems(): HasMany
     {
