@@ -8,6 +8,8 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Web\Profile\PasswordUpdateRequest;
 use App\Http\Requests\Web\Profile\ProfileUpdateRequest;
 use App\Models\Category;
+use App\Models\Event;
+use App\Models\Promoter;
 use App\Models\Tag;
 use App\Services\Engagement\FavoriteService;
 use Illuminate\Http\RedirectResponse;
@@ -22,6 +24,23 @@ class ProfileController extends Controller
     {
         $user = $request->user();
 
+        $followedPromoters = Promoter::query()
+            ->whereIn('id', $user->follows()
+                ->where('followable_type', (new Promoter)->getMorphClass())
+                ->pluck('followable_id'))
+            ->withCount('events')
+            ->orderBy('name')
+            ->get();
+
+        $favoriteEvents = Event::query()
+            ->whereIn('id', $user->favorites()
+                ->where('favoritable_type', (new Event)->getMorphClass())
+                ->pluck('favoritable_id'))
+            ->published()
+            ->with(['categories', 'occurrences' => fn ($q) => $q->upcoming()->with('venue')])
+            ->limit(3)
+            ->get();
+
         return view('my.profile', [
             'user' => $user,
             'categories' => Category::query()->where('is_active', true)->orderBy('name')->get(),
@@ -32,6 +51,8 @@ class ProfileController extends Controller
             'favoriteTagIds' => $user->favorites()
                 ->where('favoritable_type', (new Tag)->getMorphClass())
                 ->pluck('favoritable_id')->all(),
+            'followedPromoters' => $followedPromoters,
+            'favoriteEvents' => $favoriteEvents,
         ]);
     }
 
