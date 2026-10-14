@@ -52,7 +52,10 @@ class EventWorkflow
         array $tagNames = [],
         array $ticketTiers = [],
     ): Event {
-        $event = DB::transaction(function () use ($promoter, $attributes, $categoryIds, $occurrences, $submitter, $tagNames, $ticketTiers): Event {
+        // Build the event and its relations with Scout indexing suspended, so a
+        // searchable (auto-published) event is not indexed — nor its relations
+        // cached empty on the model — before tags/occurrences are attached.
+        $event = Event::withoutSyncingToSearch(fn (): Event => DB::transaction(function () use ($promoter, $attributes, $categoryIds, $occurrences, $submitter, $tagNames, $ticketTiers): Event {
             $status = $this->initialStatusFor($promoter);
 
             $event = $promoter->events()->create([
@@ -83,10 +86,17 @@ class EventWorkflow
             }
 
             return $event;
-        });
+        }));
 
         if ($event->status === EventStatus::Published) {
             $this->notifyFollowers->handle($event);
+        }
+
+        // Relations are now attached: refresh them on the returned model and
+        // index once with the complete document.
+        $event->load(['categories', 'tags', 'occurrences.venue', 'promoter']);
+        if ($event->shouldBeSearchable()) {
+            $event->searchable();
         }
 
         return $event;
