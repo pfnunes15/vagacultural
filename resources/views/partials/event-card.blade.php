@@ -1,5 +1,14 @@
-@php $next = $event->occurrences->first(); @endphp
-<article class="vcard overflow-hidden group">
+@php
+    $next = $event->occurrences->first();
+    $saved = in_array($event->id, $myFavoriteEventIds ?? []);
+@endphp
+<article class="vcard overflow-hidden group relative">
+    @auth
+        <button data-toggle="favorite" data-slug="{{ $event->slug }}" aria-pressed="{{ $saved ? 'true' : 'false' }}" aria-label="Guardar"
+                class="absolute z-10 top-3 right-3 w-8 h-8 rounded-full bg-black/35 backdrop-blur grid place-items-center text-white">
+            <svg viewBox="0 0 24 24" width="15" height="15" fill="{{ $saved ? 'currentColor' : 'none' }}" stroke="currentColor" stroke-width="2"><path d="M6 3h12a1 1 0 0 1 1 1v17l-7-4-7 4V4a1 1 0 0 1 1-1z"/></svg>
+        </button>
+    @endauth
     <a href="{{ route('events.show', $event) }}" class="block">
         <div class="aspect-[16/10] relative overflow-hidden"
              style="background:linear-gradient(135deg, color-mix(in oklab, var(--color-primary) 30%, var(--color-surface)), var(--color-surface));">

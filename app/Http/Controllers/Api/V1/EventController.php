@@ -21,8 +21,9 @@ class EventController extends Controller
     public function index(Request $request): AnonymousResourceCollection
     {
         $category = $request->string('categoria')->value() ?: null;
+        $search = $request->string('q')->value() ?: null;
 
-        return EventResource::collection($this->events->upcomingList($category));
+        return EventResource::collection($this->events->upcomingList($category, $search));
     }
 
     /** Public: upcoming occurrences grouped by day. */

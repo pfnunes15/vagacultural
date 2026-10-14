@@ -14,8 +14,9 @@
             <form method="GET" action="{{ route('events.index') }}" class="mt-6 flex gap-2 max-w-xl">
                 <div class="relative flex-1">
                     <svg class="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--color-muted)]" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3" stroke-linecap="round"/></svg>
-                    <input name="q" value="{{ $search }}" placeholder="Procurar eventos, locais, promotores…"
+                    <input name="q" value="{{ $search }}" placeholder="Procurar eventos, locais, promotores…" data-search-input autocomplete="off"
                            class="w-full pl-11 pr-4 py-3 rounded-xl bg-[var(--color-surface)] border border-[var(--color-border)] placeholder:text-[var(--color-muted)] focus:outline-none">
+                    <div data-search-results hidden class="absolute left-0 right-0 top-full mt-2 vcard overflow-hidden z-20"></div>
                 </div>
                 <button class="btn-primary">Procurar</button>
             </form>

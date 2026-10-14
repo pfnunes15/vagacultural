@@ -6,6 +6,7 @@ namespace App\Providers;
 
 use App\Contracts\PaymentGateway;
 use App\Contracts\PushSender;
+use App\Models\Event;
 use App\Models\EventOccurrence;
 use App\Models\Ticket;
 use App\Policies\TicketTypePolicy;
@@ -13,6 +14,7 @@ use App\Services\Payments\Drivers\FakePaymentGateway;
 use App\Services\Push\Drivers\FcmPushSender;
 use App\Services\Push\Drivers\LogPushSender;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -51,5 +53,20 @@ class AppServiceProvider extends ServiceProvider
             Ticket::class,
             TicketTypePolicy::class,
         );
+
+        // Share the current user's favourited event ids with every view (one
+        // lazy query per request) so event cards render the right saved state.
+        View::composer('*', function ($view): void {
+            static $ids = null;
+            if ($ids === null) {
+                $user = auth()->user();
+                $ids = $user
+                    ? $user->favorites()
+                        ->where('favoritable_type', (new Event)->getMorphClass())
+                        ->pluck('favoritable_id')->all()
+                    : [];
+            }
+            $view->with('myFavoriteEventIds', $ids);
+        });
     }
 }

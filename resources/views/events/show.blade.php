@@ -19,7 +19,7 @@
                     <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="m15 18-6-6 6-6" stroke-linecap="round" stroke-linejoin="round"/></svg>
                 </a>
                 @auth
-                    <button id="favBtn" data-slug="{{ $event->slug }}" aria-pressed="{{ $isFav ? 'true' : 'false' }}"
+                    <button data-toggle="favorite" data-slug="{{ $event->slug }}" aria-pressed="{{ $isFav ? 'true' : 'false' }}"
                             class="absolute top-4 right-4 w-9 h-9 rounded-full bg-black/35 backdrop-blur grid place-items-center text-white" aria-label="Guardar">
                         <svg viewBox="0 0 24 24" width="18" height="18" fill="{{ $isFav ? 'currentColor' : 'none' }}" stroke="currentColor" stroke-width="2"><path d="M6 3h12a1 1 0 0 1 1 1v17l-7-4-7 4V4a1 1 0 0 1 1-1z"/></svg>
                     </button>
@@ -111,7 +111,7 @@
             </div>
 
             @auth
-                <button id="agendaBtn" data-slug="{{ $event->slug }}" aria-pressed="{{ $inAgenda ? 'true' : 'false' }}" class="btn-ghost w-full justify-center">
+                <button data-toggle="agenda" data-slug="{{ $event->slug }}" aria-pressed="{{ $inAgenda ? 'true' : 'false' }}" data-on-label="✓ Na minha agenda" data-off-label="+ Adicionar à agenda" class="btn-ghost w-full justify-center">
                     <span class="lbl">{{ $inAgenda ? '✓ Na minha agenda' : '+ Adicionar à agenda' }}</span>
                 </button>
             @endauth
@@ -125,7 +125,7 @@
                 </div>
                 @auth
                     @php $following = auth()->user()->follows()->where('followable_type', $event->promoter->getMorphClass())->where('followable_id', $event->promoter->id)->exists(); @endphp
-                    <button id="followBtn" data-slug="{{ $event->promoter->slug }}" aria-pressed="{{ $following ? 'true' : 'false' }}" class="btn-ghost text-sm">
+                    <button data-toggle="follow" data-slug="{{ $event->promoter->slug }}" aria-pressed="{{ $following ? 'true' : 'false' }}" data-on-label="A seguir ✓" data-off-label="Seguir" class="btn-ghost text-sm">
                         <span class="lbl">{{ $following ? 'A seguir ✓' : 'Seguir' }}</span>
                     </button>
                 @endauth
@@ -133,36 +133,4 @@
         </aside>
     </div>
 
-    @push('scripts')
-    <script>
-    (function () {
-        const csrf = document.querySelector('meta[name=csrf-token]')?.content;
-        async function api(url) {
-            const r = await fetch(url, { method: 'POST', headers: { 'Accept': 'application/json', 'X-CSRF-TOKEN': csrf }, credentials: 'same-origin' });
-            return r.ok ? r.json() : null;
-        }
-        const fav = document.getElementById('favBtn');
-        fav?.addEventListener('click', async () => {
-            const d = await api(`/api/v1/events/${fav.dataset.slug}/favorite`);
-            if (!d) return;
-            fav.setAttribute('aria-pressed', d.favorited);
-            fav.querySelector('svg').setAttribute('fill', d.favorited ? 'currentColor' : 'none');
-        });
-        const ag = document.getElementById('agendaBtn');
-        ag?.addEventListener('click', async () => {
-            const d = await api(`/api/v1/events/${ag.dataset.slug}/agenda`);
-            if (!d) return;
-            ag.setAttribute('aria-pressed', d.in_agenda);
-            ag.querySelector('.lbl').textContent = d.in_agenda ? '✓ Na minha agenda' : '+ Adicionar à agenda';
-        });
-        const fol = document.getElementById('followBtn');
-        fol?.addEventListener('click', async () => {
-            const d = await api(`/api/v1/promoters/${fol.dataset.slug}/follow`);
-            if (!d) return;
-            fol.setAttribute('aria-pressed', d.following);
-            fol.querySelector('.lbl').textContent = d.following ? 'A seguir ✓' : 'Seguir';
-        });
-    })();
-    </script>
-    @endpush
 @endsection
