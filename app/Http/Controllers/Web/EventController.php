@@ -46,6 +46,7 @@ class EventController extends Controller
 
         return view('partials.events-grid', [
             'events' => $this->events->upcomingList($category),
+            'category' => $category,
         ]);
     }
 

@@ -117,4 +117,31 @@ function initCategoryFilters() {
     });
 }
 
+// --- Load more events (append next page, no reload) ---
+document.addEventListener('click', async (e) => {
+    const btn = e.target.closest('[data-load-more]');
+    if (!btn) return;
+    e.preventDefault();
+    const grid = document.querySelector('[data-grid-items]');
+    if (!grid) return;
+
+    const params = new URLSearchParams({ page: btn.dataset.next });
+    if (btn.dataset.category) params.set('category', btn.dataset.category);
+
+    btn.disabled = true;
+    btn.textContent = 'A carregar…';
+    const r = await fetch(`/events-grid?${params}`, { headers: { 'X-Requested-With': 'XMLHttpRequest' }, credentials: 'same-origin' });
+    if (!r.ok) { btn.disabled = false; btn.textContent = 'Ver mais eventos'; return; }
+
+    const html = await r.text();
+    const tmp = document.createElement('div');
+    tmp.innerHTML = html;
+    tmp.querySelectorAll('[data-grid-items] > article').forEach((card) => grid.appendChild(card));
+
+    const nextBtn = tmp.querySelector('[data-load-more]');
+    const wrap = btn.parentElement;
+    if (nextBtn) { btn.dataset.next = nextBtn.dataset.next; btn.disabled = false; btn.textContent = 'Ver mais eventos'; }
+    else wrap.remove();
+});
+
 document.addEventListener('DOMContentLoaded', () => { initSearch(); initCategoryFilters(); });
