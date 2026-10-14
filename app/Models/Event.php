@@ -15,6 +15,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Storage;
 use Laravel\Scout\Searchable;
 use Spatie\Translatable\HasTranslations;
 
@@ -96,6 +97,23 @@ class Event extends Model
     public function occurrences(): HasMany
     {
         return $this->hasMany(EventOccurrence::class);
+    }
+
+    /**
+     * Public URL of the cover image. Supports both files stored on the public
+     * disk (uploads) and absolute URLs (content imported from the live site).
+     */
+    public function coverImageUrl(): ?string
+    {
+        $path = $this->cover_image_path;
+
+        if (blank($path)) {
+            return null;
+        }
+
+        return str_starts_with($path, 'http://') || str_starts_with($path, 'https://')
+            ? $path
+            : Storage::url($path);
     }
 
     /** @return HasMany<EventImage, $this> */

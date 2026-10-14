@@ -22,6 +22,10 @@ class CategorySeeder extends Seeder
             ['Cinema', ['pt' => 'Cinema', 'en' => 'Cinema', 'fr' => 'Cinéma', 'es' => 'Cine', 'de' => 'Kino', 'it' => 'Cinema'], '#2C3E50', 'film'],
             ['Dança', ['pt' => 'Dança', 'en' => 'Dance', 'fr' => 'Danse', 'es' => 'Danza', 'de' => 'Tanz', 'it' => 'Danza'], '#E67E22', 'dance'],
             ['Literatura', ['pt' => 'Literatura', 'en' => 'Literature', 'fr' => 'Littérature', 'es' => 'Literatura', 'de' => 'Literatur', 'it' => 'Letteratura'], '#7F8C8D', 'book'],
+            ['Noite', ['pt' => 'Noite', 'en' => 'Clubbing', 'fr' => 'Clubbing', 'es' => 'Noche', 'de' => 'Nachtleben', 'it' => 'Vita notturna'], '#9B59B6', 'music'],
+            ['Família', ['pt' => 'Família', 'en' => 'Family', 'fr' => 'Famille', 'es' => 'Familia', 'de' => 'Familie', 'it' => 'Famiglia'], '#27AE60', 'family'],
+            ['Conferências', ['pt' => 'Conferências', 'en' => 'Conferences', 'fr' => 'Conférences', 'es' => 'Conferencias', 'de' => 'Konferenzen', 'it' => 'Conferenze'], '#34495E', 'mic'],
+            ['Bem-estar', ['pt' => 'Bem-estar', 'en' => 'Well-being', 'fr' => 'Bien-être', 'es' => 'Bienestar', 'de' => 'Wohlbefinden', 'it' => 'Benessere'], '#1ABC9C', 'heart'],
         ];
 
         foreach ($categories as $i => [$base, $names, $color, $icon]) {

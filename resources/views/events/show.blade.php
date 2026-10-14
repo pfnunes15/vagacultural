@@ -12,8 +12,8 @@
             {{-- Hero image --}}
             <div class="relative rounded-[var(--radius-card)] overflow-hidden aspect-[16/10]"
                  style="background:linear-gradient(135deg, color-mix(in oklab, var(--color-primary) 35%, var(--color-surface)), var(--color-surface));">
-                @if ($event->cover_image_path)
-                    <img src="{{ \Illuminate\Support\Facades\Storage::url($event->cover_image_path) }}" alt="{{ $event->title }}" class="absolute inset-0 w-full h-full object-cover">
+                @if ($event->coverImageUrl())
+                    <img src="{{ $event->coverImageUrl() }}" alt="{{ $event->title }}" class="absolute inset-0 w-full h-full object-cover">
                 @endif
                 <a href="{{ route('events.index') }}" class="absolute top-4 left-4 w-9 h-9 rounded-full bg-black/35 backdrop-blur grid place-items-center text-white" aria-label="Voltar">
                     <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="m15 18-6-6 6-6" stroke-linecap="round" stroke-linejoin="round"/></svg>

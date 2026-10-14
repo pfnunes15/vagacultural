@@ -12,8 +12,8 @@
     <a href="{{ route('events.show', $event) }}" class="block">
         <div class="aspect-[16/10] relative overflow-hidden"
              style="background:linear-gradient(135deg, color-mix(in oklab, var(--color-primary) 30%, var(--color-surface)), var(--color-surface));">
-            @if ($event->cover_image_path)
-                <img src="{{ \Illuminate\Support\Facades\Storage::url($event->cover_image_path) }}" alt="{{ $event->title }}" class="absolute inset-0 w-full h-full object-cover">
+            @if ($event->coverImageUrl())
+                <img src="{{ $event->coverImageUrl() }}" alt="{{ $event->title }}" class="absolute inset-0 w-full h-full object-cover">
             @endif
             @if ($cat = $event->categories->first())
                 <span class="pill-cat absolute top-3 left-3 backdrop-blur-sm">{{ $cat->name }}</span>

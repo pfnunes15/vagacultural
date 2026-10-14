@@ -7,7 +7,6 @@ namespace App\Http\Resources;
 use App\Models\Event;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
-use Illuminate\Support\Facades\Storage;
 
 /** @mixin Event */
 class EventResource extends JsonResource
@@ -22,7 +21,7 @@ class EventResource extends JsonResource
             'summary' => $this->summary,
             'description' => $this->description,
             'is_featured' => $this->is_featured,
-            'cover_image_url' => $this->cover_image_path ? Storage::url($this->cover_image_path) : null,
+            'cover_image_url' => $this->coverImageUrl(),
             'min_age' => $this->min_age !== null ? [
                 'value' => $this->min_age->value,
                 'label' => $this->min_age->label(),
