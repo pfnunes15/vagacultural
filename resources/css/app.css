@@ -64,6 +64,14 @@ body {
         border-radius: var(--radius-card);
     }
 
+    [data-cat-filters] .pill-cat { cursor: pointer; border: 1px solid var(--color-border); }
+    [data-cat-filters] .pill-cat[aria-pressed='true'] {
+        background: var(--color-primary);
+        color: var(--color-primary-foreground);
+        border-color: var(--color-primary);
+    }
+    [data-events-grid] { transition: opacity 0.15s ease; }
+
     /* Category pill (gold) */
     .pill-cat {
         display: inline-flex;

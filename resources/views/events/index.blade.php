@@ -33,14 +33,18 @@
         <h2 class="font-display text-2xl font-semibold">{{ $heading ?? ($search ? 'Resultados' : 'Próximos eventos') }}</h2>
     </div>
 
-    @if ($events->isEmpty())
-        <div class="vcard p-8 text-center text-[var(--color-muted)]">Sem eventos a mostrar.</div>
-    @else
-        <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
-            @foreach ($events as $event)
-                @include('partials.event-card')
-            @endforeach
-        </div>
-        <div class="mt-8">{{ $events->links() }}</div>
-    @endif
+    @unless ($heading || $search)
+        @if (($categories ?? collect())->isNotEmpty())
+            <div class="flex gap-2 overflow-x-auto pb-2 mb-5" data-cat-filters>
+                <button class="pill-cat shrink-0" data-cat="" aria-pressed="true">Todas</button>
+                @foreach ($categories as $cat)
+                    <button class="pill-cat shrink-0" data-cat="{{ $cat->slug }}" aria-pressed="false">{{ $cat->name }}</button>
+                @endforeach
+            </div>
+        @endif
+    @endunless
+
+    <div data-events-grid>
+        @include('partials.events-grid')
+    </div>
 @endsection

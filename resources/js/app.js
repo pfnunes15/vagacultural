@@ -92,4 +92,29 @@ function initSearch() {
     input.addEventListener('keydown', (e) => { if (e.key === 'Escape') close(); });
 }
 
-document.addEventListener('DOMContentLoaded', initSearch);
+// --- Dynamic category filter (swaps the events grid, no reload) ---
+function initCategoryFilters() {
+    const bar = document.querySelector('[data-cat-filters]');
+    const grid = document.querySelector('[data-events-grid]');
+    if (!bar || !grid) return;
+
+    bar.addEventListener('click', async (e) => {
+        const chip = e.target.closest('[data-cat]');
+        if (!chip) return;
+        bar.querySelectorAll('[data-cat]').forEach((c) => c.setAttribute('aria-pressed', 'false'));
+        chip.setAttribute('aria-pressed', 'true');
+
+        const slug = chip.dataset.cat;
+        grid.style.opacity = '0.5';
+        const url = slug ? `/events-grid?category=${encodeURIComponent(slug)}` : '/events-grid';
+        const r = await fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' }, credentials: 'same-origin' });
+        grid.style.opacity = '';
+        if (r.ok) {
+            grid.innerHTML = await r.text();
+            const newUrl = slug ? `/category/${slug}` : '/events';
+            history.replaceState({}, '', newUrl);
+        }
+    });
+}
+
+document.addEventListener('DOMContentLoaded', () => { initSearch(); initCategoryFilters(); });

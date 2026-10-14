@@ -46,6 +46,7 @@ Route::get('/calendar', [EventController::class, 'calendar'])->name('events.cale
 Route::get('/category/{category:slug}', [EventController::class, 'category'])->name('events.category');
 Route::get('/tag/{tag:slug}', [EventController::class, 'tag'])->name('events.tag');
 Route::get('/tags/suggest', [TagController::class, 'suggest'])->name('tags.suggest');
+Route::get('/events-grid', [EventController::class, 'grid'])->name('events.grid');
 
 // ---- Public directory: promoters & organizations ----
 Route::get('/promoters', [PromoterController::class, 'index'])->name('promoters.index');

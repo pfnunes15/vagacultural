@@ -35,6 +35,17 @@ class EventController extends Controller
             'category' => $category,
             'search' => $search,
             'heading' => null,
+            'categories' => Category::query()->where('is_active', true)->orderBy('position')->get(),
+        ]);
+    }
+
+    /** Returns just the events grid (for dynamic category filtering, no reload). */
+    public function grid(Request $request): View
+    {
+        $category = $request->string('category')->value() ?: null;
+
+        return view('partials.events-grid', [
+            'events' => $this->events->upcomingList($category),
         ]);
     }
 
