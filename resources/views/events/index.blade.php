@@ -1,39 +1,45 @@
 @extends('layouts.app')
 @section('title', ($heading ?? 'Eventos') . ' — VAGA')
 @section('content')
-    <h1>{{ $heading ?? 'Eventos' }}</h1>
-    <p class="muted">Agenda cultural da Madeira e Porto Santo. A lista e o calendário são públicos — entra para veres os detalhes.</p>
 
-    <form method="GET" action="{{ route('events.index') }}" style="display:flex;gap:8px;margin:12px 0;max-width:480px">
-        <input name="q" value="{{ $search }}" placeholder="Procurar evento, resumo ou promotor…">
-        <button class="btn-ghost">Procurar</button>
-    </form>
+    @unless ($heading || $search)
+        {{-- Hero --}}
+        <section class="mb-10">
+            <p class="u-label mb-3">
+                @auth Boa, {{ auth()->user()->first_name }} · @endauth Madeira &amp; Porto Santo
+            </p>
+            <h1 class="font-display text-4xl md:text-6xl font-bold leading-[1.02] max-w-3xl">
+                Descobre o que <span class="italic text-[var(--color-primary)]">acontece hoje.</span>
+            </h1>
+            <form method="GET" action="{{ route('events.index') }}" class="mt-6 flex gap-2 max-w-xl">
+                <div class="relative flex-1">
+                    <svg class="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--color-muted)]" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3" stroke-linecap="round"/></svg>
+                    <input name="q" value="{{ $search }}" placeholder="Procurar eventos, locais, promotores…"
+                           class="w-full pl-11 pr-4 py-3 rounded-xl bg-[var(--color-surface)] border border-[var(--color-border)] placeholder:text-[var(--color-muted)] focus:outline-none">
+                </div>
+                <button class="btn-primary">Procurar</button>
+            </form>
+        </section>
+    @else
+        <div class="mb-6">
+            <h1 class="font-display text-3xl font-bold">{{ $heading ?? 'Resultados' }}</h1>
+            @if ($search)<p class="text-[var(--color-muted)] mt-1">Resultados para “{{ $search }}” · <a href="{{ route('events.index') }}" class="text-[var(--color-primary)]">limpar</a></p>@endif
+            @if ($heading)<a href="{{ route('events.index') }}" class="text-sm text-[var(--color-primary)]">ver todos os eventos</a>@endif
+        </div>
+    @endunless
 
-    @if ($heading)
-        <p><span class="tag">{{ $heading }}</span> <a href="{{ route('events.index') }}" class="muted">ver todos</a></p>
-    @elseif ($search)
-        <p class="muted">Resultados para “{{ $search }}” — <a href="{{ route('events.index') }}">limpar</a></p>
-    @endif
+    <div class="flex items-baseline justify-between mb-4">
+        <h2 class="font-display text-2xl font-semibold">{{ $heading ?? ($search ? 'Resultados' : 'Próximos eventos') }}</h2>
+    </div>
 
     @if ($events->isEmpty())
-        <div class="card">Sem eventos a mostrar.</div>
+        <div class="vcard p-8 text-center text-[var(--color-muted)]">Sem eventos a mostrar.</div>
     @else
-        <div class="grid">
+        <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
             @foreach ($events as $event)
-                @php $next = $event->occurrences->first(); @endphp
-                <article class="card">
-                    @foreach ($event->categories as $cat)
-                        <a href="{{ route('events.category', $cat) }}" class="tag" style="text-decoration:none">{{ $cat->name }}</a>
-                    @endforeach
-                    <h3 style="margin:8px 0 4px"><a href="{{ route('events.show', $event) }}">{{ $event->title }}</a></h3>
-                    @if ($next)
-                        <div class="muted">{{ $next->starts_at->translatedFormat('D, d M · H:i') }} · {{ $next->locationLabel() }}</div>
-                    @endif
-                    <p class="muted">{{ $event->summary }}</p>
-                    <div class="muted">por <a href="{{ route('promoters.show', $event->promoter) }}">{{ $event->promoter->name }}</a></div>
-                </article>
+                @include('partials.event-card')
             @endforeach
         </div>
-        <div style="margin-top:20px">{{ $events->links() }}</div>
+        <div class="mt-8">{{ $events->links() }}</div>
     @endif
 @endsection
