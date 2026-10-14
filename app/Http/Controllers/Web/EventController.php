@@ -30,12 +30,26 @@ class EventController extends Controller
             $this->activity->log('search', properties: ['q' => $search]);
         }
 
+        // Themed sections only on the plain home (no category/search filter).
+        $sections = [];
+        if ($category === null && $search === null) {
+            $featured = $this->events->featured();
+            $weekend = $this->events->thisWeekend();
+            if ($featured->isNotEmpty()) {
+                $sections[] = ['key' => 'featured', 'title' => 'Curadoria VAGA', 'events' => $featured];
+            }
+            if ($weekend->isNotEmpty()) {
+                $sections[] = ['key' => 'weekend', 'title' => 'Este fim de semana', 'events' => $weekend];
+            }
+        }
+
         return view('events.index', [
             'events' => $this->events->upcomingList($category, $search),
             'category' => $category,
             'search' => $search,
             'heading' => null,
             'categories' => Category::query()->where('is_active', true)->orderBy('position')->get(),
+            'sections' => $sections,
         ]);
     }
 

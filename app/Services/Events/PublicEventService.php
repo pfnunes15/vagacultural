@@ -9,6 +9,7 @@ use App\Models\EventOccurrence;
 use App\Models\Organization;
 use App\Models\Promoter;
 use App\Models\Tag;
+use Carbon\Carbon;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
@@ -37,6 +38,46 @@ class PublicEventService
             ])
             ->withMin('occurrences as next_occurrence_at', 'starts_at')
             ->orderBy('next_occurrence_at');
+    }
+
+    /**
+     * Featured upcoming events (the home "Curadoria" carousel).
+     *
+     * @return \Illuminate\Database\Eloquent\Collection<int, Event>
+     */
+    public function featured(int $limit = 6): \Illuminate\Database\Eloquent\Collection
+    {
+        return $this->baseUpcoming()->where('is_featured', true)->limit($limit)->get();
+    }
+
+    /**
+     * Events happening this weekend (Fri–Sun).
+     *
+     * @return \Illuminate\Database\Eloquent\Collection<int, Event>
+     */
+    public function thisWeekend(int $limit = 8): \Illuminate\Database\Eloquent\Collection
+    {
+        $friday = now()->next(Carbon::FRIDAY)->startOfDay();
+        if (now()->isFriday() || now()->isSaturday() || now()->isSunday()) {
+            $friday = now()->startOfDay();
+        }
+        $sunday = (clone $friday)->next(Carbon::SUNDAY)->endOfDay();
+
+        return $this->baseUpcoming()
+            ->whereHas('occurrences', fn ($q) => $q->whereBetween('starts_at', [$friday, $sunday]))
+            ->limit($limit)->get();
+    }
+
+    /**
+     * Upcoming events of a given category (home themed row).
+     *
+     * @return \Illuminate\Database\Eloquent\Collection<int, Event>
+     */
+    public function byCategory(string $slug, int $limit = 8): \Illuminate\Database\Eloquent\Collection
+    {
+        return $this->baseUpcoming()
+            ->whereHas('categories', fn ($c) => $c->where('slug', $slug))
+            ->limit($limit)->get();
     }
 
     /**

@@ -29,6 +29,10 @@
         </div>
     @endunless
 
+    @foreach ($sections ?? [] as $section)
+        @include('partials.event-row', ['title' => $section['title'], 'events' => $section['events']])
+    @endforeach
+
     <div class="flex items-baseline justify-between mb-4">
         <h2 class="font-display text-2xl font-semibold">{{ $heading ?? ($search ? 'Resultados' : 'Próximos eventos') }}</h2>
     </div>
