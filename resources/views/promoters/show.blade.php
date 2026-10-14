@@ -1,37 +1,55 @@
 @extends('layouts.app')
 @section('title', $promoter->name . ' — VAGA')
 @section('content')
-    <p><a href="{{ route('promoters.index') }}" class="muted">← Promotores</a></p>
-    <div style="display:flex;gap:14px;align-items:center">
-        @if ($promoter->logo_path)<img src="{{ \Illuminate\Support\Facades\Storage::url($promoter->logo_path) }}" alt="{{ $promoter->name }}" style="height:64px;width:64px;object-fit:cover;border-radius:10px;border:1px solid #e4dccb">@endif
-        <div>
-            <h1 style="margin:0">{{ $promoter->name }}</h1>
-            @if ($promoter->is_verified)<span class="tag">verificado</span>@endif
-            <span class="muted">· {{ $promoter->followers()->count() }} seguidor(es)</span>
-        </div>
-    </div>
-    @auth
-        <form method="POST" action="{{ route('my.follow.promoter', $promoter) }}" style="margin-top:10px">@csrf
-            <button class="btn-ghost">{{ auth()->user()->follows()->where('followable_type', $promoter->getMorphClass())->where('followable_id', $promoter->id)->exists() ? 'A seguir ✓' : 'Seguir' }}</button>
-        </form>
-    @endauth
-    @if ($promoter->organization)<span class="muted">· {{ $promoter->organization->name }}</span>@endif
-    @if ($promoter->description)<p>{{ $promoter->description }}</p>@endif
-    @if ($promoter->website)<p class="muted"><a href="{{ $promoter->website }}" target="_blank" rel="noopener">{{ $promoter->website }}</a></p>@endif
+    <a href="{{ route('promoters.index') }}" class="text-sm text-[var(--color-muted)] hover:text-[var(--color-foreground)]">← Promotores</a>
 
-    <h2 style="margin-top:24px">Próximos eventos</h2>
-    @if ($events->isEmpty())
-        <div class="card">Sem eventos próximos.</div>
-    @else
-        <div class="grid">
-            @foreach ($events as $event)
-                @php $next = $event->occurrences->first(); @endphp
-                <article class="card">
-                    <h3 style="margin:0 0 4px"><a href="{{ route('events.show', $event) }}">{{ $event->title }}</a></h3>
-                    @if ($next)<div class="muted">{{ $next->starts_at->translatedFormat('D, d M · H:i') }} · {{ $next->locationLabel() }}</div>@endif
-                </article>
-            @endforeach
+    <div class="vcard p-6 mt-4 flex items-center gap-5">
+        <div class="w-16 h-16 rounded-2xl bg-[var(--color-surface-2)] grid place-items-center font-display font-bold text-2xl flex-none overflow-hidden">
+            @if ($promoter->logo_path)<img src="{{ \Illuminate\Support\Facades\Storage::url($promoter->logo_path) }}" class="w-full h-full object-cover" alt="">@else{{ strtoupper(mb_substr($promoter->name,0,1)) }}@endif
         </div>
-        <div style="margin-top:20px">{{ $events->links() }}</div>
+        <div class="flex-1 min-w-0">
+            <h1 class="font-display text-2xl font-bold">{{ $promoter->name }}</h1>
+            <div class="text-sm text-[var(--color-muted)] mt-0.5">
+                @if ($promoter->is_verified)✓ verificado · @endif
+                <span id="followerCount">{{ $promoter->followers()->count() }}</span> seguidor(es)
+                @if ($promoter->organization) · {{ $promoter->organization->name }}@endif
+            </div>
+            @if ($promoter->description)<p class="mt-2 text-[var(--color-muted)]">{{ $promoter->description }}</p>@endif
+        </div>
+        @auth
+            @php $following = auth()->user()->follows()->where('followable_type', $promoter->getMorphClass())->where('followable_id', $promoter->id)->exists(); @endphp
+            <button id="followBtn" data-slug="{{ $promoter->slug }}" aria-pressed="{{ $following ? 'true' : 'false' }}" class="{{ $following ? 'btn-ghost' : 'btn-primary' }}">
+                <span class="lbl">{{ $following ? 'A seguir ✓' : 'Seguir' }}</span>
+            </button>
+        @endauth
+    </div>
+
+    <h2 class="font-display text-xl font-semibold mt-8 mb-4">Próximos eventos</h2>
+    @if ($events->isEmpty())
+        <div class="vcard p-8 text-center text-[var(--color-muted)]">Sem eventos próximos.</div>
+    @else
+        <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
+            @foreach ($events as $event)@include('partials.event-card')@endforeach
+        </div>
+        <div class="mt-8">{{ $events->links() }}</div>
     @endif
+
+    @auth
+        @push('scripts')
+        <script>
+        (function(){
+            const b = document.getElementById('followBtn'); if(!b) return;
+            const csrf = document.querySelector('meta[name=csrf-token]')?.content;
+            b.addEventListener('click', async () => {
+                const r = await fetch(`/api/v1/promoters/${b.dataset.slug}/follow`, {method:'POST',headers:{'Accept':'application/json','X-CSRF-TOKEN':csrf},credentials:'same-origin'});
+                if(!r.ok) return; const d = await r.json();
+                b.setAttribute('aria-pressed', d.following);
+                b.className = d.following ? 'btn-ghost' : 'btn-primary';
+                b.querySelector('.lbl').textContent = d.following ? 'A seguir ✓' : 'Seguir';
+                const c = document.getElementById('followerCount'); if(c) c.textContent = Math.max(0, (+c.textContent) + (d.following?1:-1));
+            });
+        })();
+        </script>
+        @endpush
+    @endauth
 @endsection

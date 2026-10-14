@@ -1,22 +1,19 @@
 @extends('layouts.app')
 @section('title', 'Para ti — VAGA')
 @section('content')
-    <h1>Recomendados para ti</h1>
-    <p class="muted">Sugestões com base nas tuas categorias favoritas, em quem segues e no que guardaste.</p>
-
+    <h1 class="font-display text-3xl font-bold">Para ti</h1>
+    <p class="text-[var(--color-muted)] mt-1 mb-6">Com base nos teus gostos, em quem segues e no que guardaste.</p>
     @if ($events->isEmpty())
-        <div class="card">Ainda não há recomendações. Explora a <a href="{{ route('events.index') }}">agenda</a>, segue promotores e guarda eventos.</div>
+        <div class="vcard p-8 text-center text-[var(--color-muted)]">Ainda não há recomendações. Explora a <a href="{{ route('events.index') }}">agenda</a>, segue promotores e guarda eventos.</div>
     @else
-        <div class="grid">
+        <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
             @foreach ($events as $event)
-                @php $next = $event->occurrences->first(); @endphp
-                <article class="card">
-                    @if ($event->recommendation_reason)<span class="tag" style="background:#e8f5e9;color:#0e5b4f">{{ $event->recommendation_reason }}</span>@endif
-                    @foreach ($event->categories as $cat)<a href="{{ route('events.category', $cat) }}" class="tag" style="text-decoration:none">{{ $cat->name }}</a>@endforeach
-                    <h3 style="margin:8px 0 4px"><a href="{{ route('events.show', $event) }}">{{ $event->title }}</a></h3>
-                    @if ($next)<div class="muted">{{ $next->starts_at->translatedFormat('D, d M · H:i') }} · {{ $next->locationLabel() }}</div>@endif
-                    <div class="muted">por {{ $event->promoter->name }}</div>
-                </article>
+                <div class="relative">
+                    @if ($event->recommendation_reason)
+                        <span class="absolute z-10 top-3 right-3 pill-cat" style="background:color-mix(in oklab, var(--color-primary) 20%, transparent); color:var(--color-primary)">{{ $event->recommendation_reason }}</span>
+                    @endif
+                    @include('partials.event-card')
+                </div>
             @endforeach
         </div>
     @endif
