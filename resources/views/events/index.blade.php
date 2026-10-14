@@ -20,6 +20,16 @@
                 </div>
                 <button class="btn-primary">Procurar</button>
             </form>
+
+            @if (!empty($trending))
+                <div class="mt-4 flex flex-wrap items-center gap-2">
+                    <span class="u-label mr-1">Pesquisas em alta</span>
+                    @foreach ($trending as $term)
+                        <a href="{{ route('events.index', ['q' => $term]) }}"
+                           class="pill-cat text-sm">{{ $term }}</a>
+                    @endforeach
+                </div>
+            @endif
         </section>
     @else
         <div class="mb-6">
@@ -33,11 +43,10 @@
         @include('partials.event-row', ['title' => $section['title'], 'events' => $section['events']])
     @endforeach
 
-    <div class="flex items-baseline justify-between mb-4">
-        <h2 class="font-display text-2xl font-semibold">{{ $heading ?? ($search ? 'Resultados' : 'Próximos eventos') }}</h2>
-    </div>
-
     @unless ($heading || $search)
+        <div class="flex items-baseline justify-between mb-4">
+            <h2 class="font-display text-2xl font-semibold">Próximos eventos</h2>
+        </div>
         @if (($categories ?? collect())->isNotEmpty())
             <div class="flex gap-2 overflow-x-auto pb-2 mb-5" data-cat-filters>
                 <button class="pill-cat shrink-0" data-cat="" aria-pressed="true">Todas</button>

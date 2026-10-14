@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Services\Events;
 
+use App\Models\ActivityLog;
 use App\Models\Event;
 use App\Models\EventOccurrence;
 use App\Models\Organization;
@@ -13,6 +14,7 @@ use Carbon\Carbon;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Str;
 
 /**
  * Read-side queries for the public (visitor-facing) events area.
@@ -144,6 +146,55 @@ class PublicEventService
         return $this->baseUpcoming()
             ->whereHas('promoter', fn ($q) => $q->where('organization_id', $organization->id))
             ->paginate($perPage);
+    }
+
+    /**
+     * Most-searched terms recently, for the "Pesquisas em alta" chips. Falls
+     * back to popular tag names so the row always looks curated, even early on.
+     *
+     * @return list<string>
+     */
+    public function trendingSearches(int $limit = 6, int $days = 30): array
+    {
+        $terms = ActivityLog::query()
+            ->where('action', 'search')
+            ->where('created_at', '>=', now()->subDays($days))
+            ->latest('created_at')
+            ->limit(500)
+            ->pluck('properties')
+            ->map(fn ($p): string => is_array($p) ? trim((string) ($p['q'] ?? '')) : '')
+            ->filter(fn (string $q): bool => mb_strlen($q) >= 2)
+            ->countBy(fn (string $q): string => mb_strtolower($q))
+            ->sortDesc()
+            ->keys()
+            ->take($limit)
+            ->map(fn (string $q): string => Str::ucfirst($q))
+            ->values()
+            ->all();
+
+        if (count($terms) >= $limit) {
+            return $terms;
+        }
+
+        $seen = array_map('mb_strtolower', $terms);
+        $tags = Tag::query()
+            ->withCount('events')
+            ->orderByDesc('events_count')
+            ->limit($limit * 2)
+            ->pluck('name');
+
+        foreach ($tags as $name) {
+            $name = trim((string) $name);
+            if ($name !== '' && ! in_array(mb_strtolower($name), $seen, true)) {
+                $terms[] = $name;
+                $seen[] = mb_strtolower($name);
+            }
+            if (count($terms) >= $limit) {
+                break;
+            }
+        }
+
+        return array_slice($terms, 0, $limit);
     }
 
     /**

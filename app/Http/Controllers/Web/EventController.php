@@ -30,9 +30,11 @@ class EventController extends Controller
             $this->activity->log('search', properties: ['q' => $search]);
         }
 
-        // Themed sections only on the plain home (no category/search filter).
+        // Themed sections and trending chips only on the plain home.
         $sections = [];
+        $trending = [];
         if ($category === null && $search === null) {
+            $trending = $this->events->trendingSearches();
             $featured = $this->events->featured();
             $weekend = $this->events->thisWeekend();
             if ($featured->isNotEmpty()) {
@@ -50,6 +52,7 @@ class EventController extends Controller
             'heading' => null,
             'categories' => Category::query()->where('is_active', true)->orderBy('position')->get(),
             'sections' => $sections,
+            'trending' => $trending,
         ]);
     }
 
