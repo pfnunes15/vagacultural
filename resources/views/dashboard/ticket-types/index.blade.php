@@ -1,12 +1,12 @@
 @extends('layouts.app')
 @section('title', 'Bilhetes — VAGA')
 @section('content')
-    <p><a href="{{ route('dashboard.events.index') }}" class="muted">← Painel</a></p>
-    <h1>Bilhetes · {{ $occurrence->event->title }}</h1>
+    <a href="{{ route('dashboard.events.index') }}" class="text-sm text-[var(--color-muted)] hover:text-[var(--color-foreground)]">← Painel</a>
+    <h1 class="font-display text-3xl font-bold mt-2">Bilhetes · {{ $occurrence->event->title }}</h1>
     <p class="muted">{{ $occurrence->starts_at->translatedFormat('l, d \d\e F · H:i') }} — {{ $occurrence->locationLabel() }}</p>
     @error('ticket_type')<div class="notice">{{ $message }}</div>@enderror
 
-    <h2 style="margin-top:20px">Tipos de bilhete</h2>
+    <h2 class="font-display text-xl font-semibold mt-6 mb-2">Tipos de bilhete</h2>
     @forelse ($occurrence->ticketTypes as $type)
         <div class="card" style="margin-bottom:10px">
             <form method="POST" action="{{ route('dashboard.occurrences.tickets.update', [$occurrence, $type]) }}" style="display:flex;gap:8px;flex-wrap:wrap;align-items:flex-end">
@@ -26,7 +26,7 @@
         <div class="card">Ainda não há tipos de bilhete.</div>
     @endforelse
 
-    <h3 style="margin-top:16px">Novo tipo</h3>
+    <h3 class="font-display font-semibold mt-6 mb-2">Novo tipo</h3>
     <form method="POST" action="{{ route('dashboard.occurrences.tickets.store', $occurrence) }}" style="display:flex;gap:8px;flex-wrap:wrap;align-items:flex-end;max-width:620px">
         @csrf
         <div><label>Nome</label><input name="name" value="{{ old('name') }}" required style="width:160px"></div>
@@ -36,5 +36,5 @@
     </form>
     @error('capacity')<div class="err">{{ $message }}</div>@enderror
 
-    <p style="margin-top:20px"><a class="btn-ghost" href="{{ route('dashboard.occurrences.checkin', $occurrence) }}">Abrir check-in →</a></p>
+    <p style="margin-top:20px"><a class="btn-ghost text-sm" href="{{ route('dashboard.occurrences.checkin', $occurrence) }}">Abrir check-in →</a></p>
 @endsection

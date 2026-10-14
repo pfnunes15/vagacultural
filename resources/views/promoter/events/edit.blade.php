@@ -1,38 +1,35 @@
 @extends('layouts.app')
 @section('title', 'Editar evento — VAGA')
 @section('content')
-    <div style="display:flex;align-items:center;gap:12px">
-        <h1 style="margin-right:auto">Editar evento</h1>
-        <span class="tag">{{ $event->status->label() }}</span>
-    </div>
-    @if ($event->occurrences->isNotEmpty())
-        <div class="card" style="margin-bottom:16px">
-            <strong>Bilhetes por sessão</strong>
-            <ul>
-                @foreach ($event->occurrences as $occ)
-                    <li>
-                        {{ $occ->starts_at->translatedFormat('d \d\e F · H:i') }} —
-                        <a href="{{ route('dashboard.occurrences.tickets', $occ) }}">gerir bilhetes</a> ·
-                        <a href="{{ route('dashboard.occurrences.checkin', $occ) }}">check-in</a>
-                    </li>
-                @endforeach
-            </ul>
+    <div class="max-w-3xl mx-auto">
+        <div class="flex items-center gap-3 mb-6">
+            <h1 class="font-display text-3xl font-bold mr-auto">Editar evento</h1>
+            <span class="pill-cat">{{ $event->status->label() }}</span>
         </div>
-    @endif
 
-    <form method="POST" action="{{ route('dashboard.events.update', $event) }}" enctype="multipart/form-data" style="max-width:720px">
-        @csrf
-        @method('PUT')
-        @include('promoter.events._form', ['event' => $event])
-        <p style="margin-top:16px;display:flex;gap:10px;align-items:center">
-            <button type="submit">Guardar alterações</button>
-        </p>
-    </form>
+        @if ($event->occurrences->isNotEmpty())
+            <div class="vcard p-5 mb-5">
+                <h2 class="font-display font-semibold mb-2">Bilhetes por sessão</h2>
+                <ul class="space-y-1">
+                    @foreach ($event->occurrences as $occ)
+                        <li class="text-sm">{{ $occ->starts_at->translatedFormat('d \d\e F · H:i') }} —
+                            <a href="{{ route('dashboard.occurrences.tickets', $occ) }}">gerir bilhetes</a> ·
+                            <a href="{{ route('dashboard.occurrences.checkin', $occ) }}">check-in</a>
+                        </li>
+                    @endforeach
+                </ul>
+            </div>
+        @endif
 
-    <form method="POST" action="{{ route('dashboard.events.destroy', $event) }}" style="max-width:720px;margin-top:8px"
-          onsubmit="return confirm('Remover este evento? Esta ação pode ser revertida por um administrador.')">
-        @csrf
-        @method('DELETE')
-        <button class="btn-ghost" style="color:#c0392b;border-color:#c0392b">Remover evento</button>
-    </form>
+        <form method="POST" action="{{ route('dashboard.events.update', $event) }}" enctype="multipart/form-data" class="vcard p-6">
+            @csrf @method('PUT')
+            @include('promoter.events._form', ['event' => $event])
+            <button type="submit" class="btn-primary mt-6">Guardar alterações</button>
+        </form>
+
+        <form method="POST" action="{{ route('dashboard.events.destroy', $event) }}" class="mt-4" onsubmit="return confirm('Remover este evento?')">
+            @csrf @method('DELETE')
+            <button class="btn-ghost text-sm" style="color:oklch(72% .17 25)">Remover evento</button>
+        </form>
+    </div>
 @endsection

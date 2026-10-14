@@ -1,12 +1,10 @@
 @extends('layouts.app')
 @section('title', 'Os meus eventos — VAGA')
 @section('content')
-    <div style="display:flex;align-items:center;gap:12px">
-        <h1 style="margin-right:auto">Os meus eventos</h1>
-        <a class="btn-ghost" href="{{ route('dashboard.profile') }}">Perfil público</a>
-        @if ($canCreate)
-            <a class="btn" href="{{ route('dashboard.events.create') }}">Novo evento</a>
-        @endif
+    <div class="flex items-center gap-3 mb-6">
+        <h1 class="font-display text-3xl font-bold mr-auto">Os meus eventos</h1>
+        <a class="btn-ghost text-sm" href="{{ route('dashboard.profile') }}">Perfil público</a>
+        @if ($canCreate)<a class="btn-primary text-sm" href="{{ route('dashboard.events.create') }}">Novo evento</a>@endif
     </div>
 
     @if ($needsPromoter)
@@ -14,26 +12,23 @@
     @endif
 
     @if ($events->isEmpty())
-        <div class="card">
-            Ainda não tens eventos.
-            @if ($canCreate)<a href="{{ route('dashboard.events.create') }}">Cria o primeiro</a>.@endif
-        </div>
+        <div class="vcard p-8 text-center text-[var(--color-muted)]">Ainda não tens eventos. @if ($canCreate)<a href="{{ route('dashboard.events.create') }}">Cria o primeiro</a>.@endif</div>
     @else
-        <table style="width:100%;border-collapse:collapse;margin-top:12px">
-            <thead><tr style="text-align:left;border-bottom:1px solid #e4dccb">
-                <th style="padding:8px 6px">Evento</th><th>Promotor</th><th>Estado</th><th></th>
-            </tr></thead>
-            <tbody>
-            @foreach ($events as $event)
-                <tr style="border-bottom:1px solid #eee">
-                    <td style="padding:8px 6px">{{ $event->title }}</td>
-                    <td class="muted">{{ $event->promoter->name }}</td>
-                    <td><span class="tag">{{ $event->status->label() }}</span></td>
-                    <td><a href="{{ route('dashboard.events.edit', $event) }}">Editar</a></td>
-                </tr>
-            @endforeach
-            </tbody>
-        </table>
-        <div style="margin-top:16px">{{ $events->links() }}</div>
+        <div class="vcard overflow-hidden">
+            <table>
+                <thead><tr><th>Evento</th><th>Promotor</th><th>Estado</th><th></th></tr></thead>
+                <tbody>
+                @foreach ($events as $event)
+                    <tr>
+                        <td class="font-medium">{{ $event->title }}</td>
+                        <td class="text-[var(--color-muted)]">{{ $event->promoter->name }}</td>
+                        <td><span class="pill-cat">{{ $event->status->label() }}</span></td>
+                        <td class="text-right"><a class="text-sm" href="{{ route('dashboard.events.edit', $event) }}">Editar</a></td>
+                    </tr>
+                @endforeach
+                </tbody>
+            </table>
+        </div>
+        <div class="mt-6">{{ $events->links() }}</div>
     @endif
 @endsection

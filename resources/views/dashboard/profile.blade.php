@@ -1,10 +1,10 @@
 @extends('layouts.app')
 @section('title', 'Perfil público — VAGA')
 @section('content')
-    <h1>Perfil de {{ $type }}</h1>
+    <h1 class="font-display text-3xl font-bold">Perfil de {{ $type }}</h1>
     <p class="muted">Estes dados aparecem no teu perfil público.</p>
 
-    <form method="POST" action="{{ route('dashboard.profile.update') }}" enctype="multipart/form-data" style="max-width:560px">
+    <form method="POST" action="{{ route('dashboard.profile.update') }}" enctype="multipart/form-data" class="vcard p-6 max-w-xl">
         @csrf @method('PUT')
 
         @if ($entity->logo_path)
@@ -27,6 +27,6 @@
             <div style="flex:1"><label for="phone">Telefone</label><input id="phone" name="phone" value="{{ old('phone', $entity->phone) }}"></div>
         </div>
 
-        <p style="margin-top:16px"><button type="submit">Guardar perfil</button></p>
+        <p style="margin-top:16px"><button type="submit" class="btn-primary mt-4">Guardar perfil</button></p>
     </form>
 @endsection
