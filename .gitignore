@@ -29,3 +29,6 @@ Thumbs.db
 
 # stray test sqlite db (phpunit :memory: fallback)
 /vaga
+
+# local DB dumps (staging seed, etc.)
+/database/dumps/

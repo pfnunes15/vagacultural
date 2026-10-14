@@ -1,16 +1,16 @@
 name: Deploy to staging
 
-# Automatic deploy to the staging host over SSH.
+# Automatic deploy to the FTP staging host.
 # Triggers on a push to the `staging` branch, or manually from the Actions tab.
 #
 # Required GitHub secrets (Settings → Secrets and variables → Actions):
-#   SSH_HOST      host, e.g. staging.vagacultural.pt
-#   SSH_USERNAME  SSH user
-#   SSH_KEY       private key (its public key is authorised on the host)
-#   SSH_APP_PATH  absolute path of the app on the host, e.g. /home/user/staging
-#   SSH_PORT      (optional) SSH port, defaults to 22
+#   FTP_SERVER      host of the FTP server (e.g. ftp.vagacultural.pt)
+#   FTP_USERNAME    FTP user
+#   FTP_PASSWORD    FTP password
+#   FTP_SERVER_DIR  target dir on the host where the app lives (e.g. /staging/)
 #
-# The server keeps its own .env (never synced). See DEPLOY.md for the one-time host setup.
+# This only syncs files. The database is set up once by importing the SQL dump
+# via phpMyAdmin — see DEPLOY.md. The server keeps its own .env (never uploaded).
 
 on:
   push:
@@ -48,28 +48,32 @@ jobs:
           npm ci
           npm run build
 
-      - name: Load SSH key
-        uses: webfactory/ssh-agent@v0.9.0
+      - name: Deploy files over FTP
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
         with:
-          ssh-private-key: ${{ secrets.SSH_KEY }}
-
-      - name: Trust the host
-        run: |
-          mkdir -p ~/.ssh
-          ssh-keyscan -p ${{ secrets.SSH_PORT || '22' }} -H ${{ secrets.SSH_HOST }} >> ~/.ssh/known_hosts
-
-      - name: Sync files (rsync over SSH)
-        run: |
-          rsync -az --no-perms --omit-dir-times \
-            -e "ssh -p ${{ secrets.SSH_PORT || '22' }}" \
-            --exclude-from=.deployignore \
-            ./ "${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }}:${{ secrets.SSH_APP_PATH }}/"
-
-      - name: Migrate and warm caches
-        run: |
-          ssh -p ${{ secrets.SSH_PORT || '22' }} "${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }}" \
-            "cd ${{ secrets.SSH_APP_PATH }} && \
-             php artisan migrate --force && \
-             php artisan config:cache && \
-             php artisan route:cache && \
-             php artisan view:cache"
+          server: ${{ secrets.FTP_SERVER }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          server-dir: ${{ secrets.FTP_SERVER_DIR }}
+          local-dir: ./
+          dangerous-clean-slate: false
+          exclude: |
+            **/.git*
+            **/.git*/**
+            **/.github/**
+            **/node_modules/**
+            **/tests/**
+            **/.env
+            **/.env.*
+            **/storage/logs/**
+            **/storage/framework/cache/data/**
+            **/storage/framework/sessions/**
+            **/storage/framework/views/**
+            **/.ftp-deploy-sync-state.json
+            **/phpunit.xml
+            **/pint.json
+            **/phpstan.neon
+            **/docker-compose.yml
+            **/docker/**
+            **/README.md
+            **/DEPLOY.md
