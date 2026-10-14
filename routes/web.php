@@ -20,6 +20,7 @@ use App\Http\Controllers\Web\Dashboard\CheckInController;
 use App\Http\Controllers\Web\Dashboard\ProfileController as DashboardProfileController;
 use App\Http\Controllers\Web\Dashboard\TicketTypeController;
 use App\Http\Controllers\Web\EventController;
+use App\Http\Controllers\Web\MapController;
 use App\Http\Controllers\Web\My\AgendaController;
 use App\Http\Controllers\Web\My\CheckoutController as MyCheckoutController;
 use App\Http\Controllers\Web\My\FavoriteController;
@@ -43,6 +44,8 @@ Route::get('/unsubscribe/{user}', UnsubscribeController::class)->middleware('sig
 // ---- Public events area (no login required) ----
 Route::get('/events', [EventController::class, 'index'])->name('events.index');
 Route::get('/calendar', [EventController::class, 'calendar'])->name('events.calendar');
+Route::get('/map', [MapController::class, 'index'])->name('events.map');
+Route::get('/map/points', [MapController::class, 'points'])->name('events.map.points');
 Route::get('/category/{category:slug}', [EventController::class, 'category'])->name('events.category');
 Route::get('/tag/{tag:slug}', [EventController::class, 'tag'])->name('events.tag');
 Route::get('/tags/suggest', [TagController::class, 'suggest'])->name('tags.suggest');

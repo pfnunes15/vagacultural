@@ -6,6 +6,7 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('title', 'VAGA — Agenda Cultural da Madeira')</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+    @stack('head')
 </head>
 <body class="min-h-screen">
     <header class="sticky top-0 z-40 border-b border-[var(--color-border)]"
@@ -16,6 +17,7 @@
             <nav class="hidden md:flex items-center gap-1 text-sm ml-2">
                 <a class="px-3 py-2 rounded-lg hover:bg-[var(--color-surface-2)]" href="{{ route('events.index') }}">Eventos</a>
                 <a class="px-3 py-2 rounded-lg hover:bg-[var(--color-surface-2)] text-[var(--color-muted)] hover:text-[var(--color-foreground)]" href="{{ route('events.calendar') }}">Calendário</a>
+                <a class="px-3 py-2 rounded-lg hover:bg-[var(--color-surface-2)] text-[var(--color-muted)] hover:text-[var(--color-foreground)]" href="{{ route('events.map') }}">Mapa</a>
                 <a class="px-3 py-2 rounded-lg hover:bg-[var(--color-surface-2)] text-[var(--color-muted)] hover:text-[var(--color-foreground)]" href="{{ route('promoters.index') }}">Promotores</a>
                 <a class="px-3 py-2 rounded-lg hover:bg-[var(--color-surface-2)] text-[var(--color-muted)] hover:text-[var(--color-foreground)]" href="{{ route('organizations.index') }}">Organizações</a>
             </nav>

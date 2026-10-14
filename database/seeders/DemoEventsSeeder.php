@@ -86,25 +86,26 @@ class DemoEventsSeeder extends Seeder
     /** @return array<string, Venue> */
     private function venues(): array
     {
+        // [name, municipality, latitude, longitude]
         $defs = [
-            'se' => ['Beco da Sé', 'Funchal'],
-            'conservatorio' => ['Conservatório — Escola das Artes', 'Funchal'],
-            'baltazar' => ['Teatro Municipal Baltazar Dias', 'Funchal'],
-            'povo' => ['Praça do Povo', 'Funchal'],
-            'mudas' => ['MUDAS — Museu de Arte Contemporânea', 'Calheta'],
-            'johndospassos' => ['Centro Cultural John dos Passos', 'Ponta do Sol'],
-            'ivbam' => ['IVBAM — Mercado dos Lavradores', 'Funchal'],
-            'tef' => ['Teatro Experimental do Funchal', 'Funchal'],
-            'arriaga' => ['Avenida Arriaga', 'Funchal'],
-            'portosanto' => ['Centro de Cultura e Congressos', 'Porto Santo'],
-            'machico' => ['Fórum Machico', 'Machico'],
+            'se' => ['Beco da Sé', 'Funchal', 32.64790, -16.90950],
+            'conservatorio' => ['Conservatório — Escola das Artes', 'Funchal', 32.64900, -16.91200],
+            'baltazar' => ['Teatro Municipal Baltazar Dias', 'Funchal', 32.64780, -16.91100],
+            'povo' => ['Praça do Povo', 'Funchal', 32.64200, -16.92300],
+            'mudas' => ['MUDAS — Museu de Arte Contemporânea', 'Calheta', 32.71800, -17.17700],
+            'johndospassos' => ['Centro Cultural John dos Passos', 'Ponta do Sol', 32.67900, -17.10100],
+            'ivbam' => ['IVBAM — Mercado dos Lavradores', 'Funchal', 32.64700, -16.90600],
+            'tef' => ['Teatro Experimental do Funchal', 'Funchal', 32.64850, -16.90850],
+            'arriaga' => ['Avenida Arriaga', 'Funchal', 32.64700, -16.91500],
+            'portosanto' => ['Centro de Cultura e Congressos', 'Porto Santo', 33.06400, -16.33800],
+            'machico' => ['Fórum Machico', 'Machico', 32.72000, -16.76800],
         ];
 
         $out = [];
-        foreach ($defs as $key => [$name, $municipality]) {
+        foreach ($defs as $key => [$name, $municipality, $lat, $lng]) {
             $out[$key] = Venue::query()->firstOrCreate(
                 ['slug' => Str::slug($name)],
-                ['name' => $name, 'municipality' => $municipality, 'is_active' => true],
+                ['name' => $name, 'municipality' => $municipality, 'latitude' => $lat, 'longitude' => $lng, 'is_active' => true],
             );
         }
 
