@@ -2,10 +2,13 @@
 FROM php:8.4-fpm-alpine
 
 # System deps + PHP extensions required by Laravel + MySQL
+# GD (with freetype/jpeg) powers image handling and the test image factory.
 RUN apk add --no-cache \
         bash git icu-dev libzip-dev zip unzip oniguruma-dev \
+        libpng-dev libjpeg-turbo-dev freetype-dev \
         $PHPIZE_DEPS \
-    && docker-php-ext-install -j"$(nproc)" pdo_mysql bcmath intl zip opcache \
+    && docker-php-ext-configure gd --with-freetype --with-jpeg \
+    && docker-php-ext-install -j"$(nproc)" pdo_mysql bcmath intl zip opcache gd \
     && pecl install redis \
     && docker-php-ext-enable redis \
     && apk del $PHPIZE_DEPS
