@@ -101,5 +101,6 @@
             © {{ date('Y') }} VAGA · Madeira &amp; Porto Santo
         </div>
     </footer>
+    @stack('scripts')
 </body>
 </html>

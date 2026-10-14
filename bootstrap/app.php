@@ -17,6 +17,10 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
+        // Same-origin first-party requests (the web app) authenticate the API
+        // via the session cookie (Sanctum stateful), so the site can call /api/v1.
+        $middleware->statefulApi();
+
         $middleware->alias([
             'role' => EnsureUserHasRole::class,
         ]);

@@ -83,6 +83,9 @@ class DatabaseSeeder extends Seeder
         // Phase-1 ticketing: a free tier and a paid tier (price informational until payments exist).
         TicketType::create(['event_occurrence_id' => $occurrence->id, 'name' => 'Entrada livre', 'price' => 0, 'capacity' => 100, 'position' => 0]);
         TicketType::create(['event_occurrence_id' => $occurrence->id, 'name' => 'Plateia', 'price' => 12, 'capacity' => 50, 'position' => 1]);
+
+        // Realistic sample events across the islands (restyled pages look full).
+        $this->call(DemoEventsSeeder::class);
     }
 
     private function makeUser(string $name, string $email, UserRole $role): User
