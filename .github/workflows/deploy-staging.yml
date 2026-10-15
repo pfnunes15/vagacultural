@@ -1,16 +1,16 @@
 name: Deploy to staging
 
-# Automatic deploy to the FTP staging host.
-# Triggers on a push to the `staging` branch, or manually from the Actions tab.
+# Push-to-deploy: um push para a branch `staging` faz build e envia por SSH
+# para o Hostinger (vaga.admedia.pt), correndo as migrations com o PHP 8.4.
 #
-# Required GitHub secrets (Settings → Secrets and variables → Actions):
-#   FTP_SERVER      host of the FTP server (e.g. ftp.vagacultural.pt)
-#   FTP_USERNAME    FTP user
-#   FTP_PASSWORD    FTP password
-#   FTP_SERVER_DIR  target dir on the host where the app lives (e.g. /staging/)
+# Secrets (Settings -> Secrets and variables -> Actions):
+#   SSH_HOST      77.37.37.247
+#   SSH_PORT      65002
+#   SSH_USER      u707430235
+#   SSH_KEY       chave privada (~/.ssh/vaga_deploy)
+#   SSH_APP_PATH  domains/vaga.admedia.pt/vaga
 #
-# This only syncs files. The database is set up once by importing the SQL dump
-# via phpMyAdmin — see DEPLOY.md. The server keeps its own .env (never uploaded).
+# O servidor mantém o seu .env (nunca é enviado). public_html -> vaga/public (symlink).
 
 on:
   push:
@@ -30,7 +30,7 @@ jobs:
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
-          php-version: '8.3'
+          php-version: '8.4'
           extensions: mbstring, intl, pdo_mysql, zip, bcmath, gd, fileinfo, dom
           coverage: none
 
@@ -48,32 +48,43 @@ jobs:
           npm ci
           npm run build
 
-      - name: Deploy files over FTP
-        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+      - name: Load SSH key
+        uses: webfactory/ssh-agent@v0.9.0
         with:
-          server: ${{ secrets.FTP_SERVER }}
-          username: ${{ secrets.FTP_USERNAME }}
-          password: ${{ secrets.FTP_PASSWORD }}
-          server-dir: ${{ secrets.FTP_SERVER_DIR }}
-          local-dir: ./
-          dangerous-clean-slate: false
-          exclude: |
-            **/.git*
-            **/.git*/**
-            **/.github/**
-            **/node_modules/**
-            **/tests/**
-            **/.env
-            **/.env.*
-            **/storage/logs/**
-            **/storage/framework/cache/data/**
-            **/storage/framework/sessions/**
-            **/storage/framework/views/**
-            **/.ftp-deploy-sync-state.json
-            **/phpunit.xml
-            **/pint.json
-            **/phpstan.neon
-            **/docker-compose.yml
-            **/docker/**
-            **/README.md
-            **/DEPLOY.md
+          ssh-private-key: ${{ secrets.SSH_KEY }}
+
+      - name: Trust the host
+        run: |
+          mkdir -p ~/.ssh
+          ssh-keyscan -p ${{ secrets.SSH_PORT }} -H ${{ secrets.SSH_HOST }} >> ~/.ssh/known_hosts
+
+      - name: Sync files (rsync over SSH)
+        run: |
+          rsync -az --no-perms --omit-dir-times \
+            -e "ssh -p ${{ secrets.SSH_PORT }}" \
+            --exclude '.git/' \
+            --exclude '.github/' \
+            --exclude 'node_modules/' \
+            --exclude 'tests/' \
+            --exclude '.env' \
+            --exclude '.env.*' \
+            --exclude 'storage/logs/*' \
+            --exclude 'storage/framework/cache/data/*' \
+            --exclude 'storage/framework/sessions/*' \
+            --exclude 'storage/framework/views/*' \
+            --exclude 'public/storage' \
+            --exclude 'docker/' \
+            --exclude 'docker-compose.yml' \
+            --exclude 'phpunit.xml' \
+            --exclude 'pint.json' \
+            --exclude 'phpstan.neon' \
+            --exclude 'database/dumps/' \
+            ./ "${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:${{ secrets.SSH_APP_PATH }}/"
+
+      - name: Migrate and refresh caches (PHP 8.4)
+        run: |
+          ssh -p ${{ secrets.SSH_PORT }} "${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}" \
+            "set -e; cd ${{ secrets.SSH_APP_PATH }}; \
+             /opt/alt/php84/usr/bin/php artisan migrate --force; \
+             /opt/alt/php84/usr/bin/php artisan optimize:clear; \
+             /opt/alt/php84/usr/bin/php artisan storage:link 2>/dev/null || true"
