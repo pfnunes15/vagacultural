@@ -76,10 +76,32 @@ class SystemStatusService
 
     private function redis(): string
     {
+        // Redis is optional: only probe it when the app is actually configured
+        // to use it (otherwise staging/shared hosting with DB drivers would
+        // always report a false failure).
+        if (! $this->redisInUse()) {
+            return 'Não utilizado neste ambiente';
+        }
+
         /** @var mixed $pong */
         $pong = Redis::connection()->ping();
 
         return 'PING ' . (is_string($pong) ? $pong : 'PONG');
+    }
+
+    private function redisInUse(): bool
+    {
+        $queue = config('queue.default');
+        $cache = config('cache.default');
+
+        $drivers = [
+            config('session.driver'),
+            config('cache.stores.' . $cache . '.driver'),
+            config('queue.connections.' . $queue . '.driver'),
+            config('broadcasting.default'),
+        ];
+
+        return in_array('redis', $drivers, true);
     }
 
     private function queue(): string
